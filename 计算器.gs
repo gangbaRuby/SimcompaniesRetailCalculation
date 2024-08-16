@@ -172,13 +172,23 @@ function calculateAllValues(sheet, realm) { //计算最大时利润
           var modeledUnitsSoldAnHour = dataValues[j][13]
 
           // 将起始值和结束值保存为数字，而不是字符串
-          if (averagePrice - 10 > 0) {
-            startSellPrice = parseFloat((averagePrice * 0.8).toFixed(1));
-            endSellPrice = parseFloat((averagePrice * 1.2).toFixed(1));
-          } else if (averagePrice - 10 <= 0) {
-            startSellPrice = parseFloat((averagePrice * 0.8).toFixed(2));
-            endSellPrice = parseFloat((averagePrice * 1.2).toFixed(2));
+          if (averagePrice * 0.5 - 2000 >= 0) {
+            startSellPrice = parseFloat((Math.floor(averagePrice / 1) * 1).toFixed(0));
+            endSellPrice = parseFloat((averagePrice * 5).toFixed(1));
+          } else if (averagePrice * 0.5 - 500 >= 0 && averagePrice * 0.5 - 2000 < 0) {
+            startSellPrice = parseFloat((Math.floor(averagePrice / 0.5) * 0.5).toFixed(1));
+            endSellPrice = parseFloat((averagePrice * 5).toFixed(1));
+          } else if (averagePrice * 0.5 - 100 >= 0 && averagePrice * 0.5 - 500 < 0) {
+            startSellPrice = parseFloat((Math.floor(averagePrice / 0.5) * 0.5).toFixed(1));
+            endSellPrice = parseFloat((averagePrice * 5).toFixed(1));
+          } else if (averagePrice * 0.5 - 8 >= 0 && averagePrice * 0.5 - 100 < 0) {
+            startSellPrice = parseFloat((averagePrice * 0.5).toFixed(1));
+            endSellPrice = parseFloat((averagePrice * 5).toFixed(1));
+          } else if (averagePrice * 0.5 - 8 < 0) {
+            startSellPrice = parseFloat((averagePrice * 0.5).toFixed(2));
+            endSellPrice = parseFloat((averagePrice * 5).toFixed(2));
           }
+
 
 
           // 初始化 sellPrice 为起始值
@@ -204,7 +214,7 @@ function calculateAllValues(sheet, realm) { //计算最大时利润
             var vNr_s = vNr_a / 2 + 0.5
             var vNr_l = quality / 12
             var vNr_d = 2 * PROFIT_PER_BUILDING_LEVEL * (buildingLevelsNeededPerHour + 1) * (vNr_a * (1 + vNr_l * RETAIL_MODELING_QUALITY_WEIGHT)) + ((g_modeledStoreWages = modeledStoreWages) != null ? g_modeledStoreWages : 0)
-            var vNr_u = modeledUnitsSoldAnHour * vNr_s 
+            var vNr_u = modeledUnitsSoldAnHour * vNr_s
 
             // bNr函数 bNr(d, be.modeledProductionCostPerUnit, u, (f = be.modeledStoreWages) != null ? f : 0)
             var vNr_h = modeledProductionCostPerUnit + (vNr_d + ((f_modeledStoreWages = modeledStoreWages) != null ? f_modeledStoreWages : 0)) / vNr_u
@@ -220,7 +230,10 @@ function calculateAllValues(sheet, realm) { //计算最大时利润
               if (sj_y < 1) {
                 var sj_w = sj_g * (1 + sj_y) / acceleration_multiplier / 1;
                 var Jq_d = sj_w - sj_w * A2Value / 100
+              } else if (sj_y >= 1 && sellPrice > averagePrice) {
+                break;
               }
+
             } else {
               var sj_w = (sj_y * sj_f + (1 - sj_y) * sj_g) / acceleration_multiplier / 1;
               var Jq_d = sj_w - sj_w * A2Value / 100
@@ -306,11 +319,17 @@ function calculateAllValues(sheet, realm) { //计算最大时利润
               optimalSellPrice = sellPrice;
             }
 
-            // 将 sellPrice 增加 0.1
-            if (sellPrice - 10 >= 0) {
-              sellPrice = parseFloat((sellPrice + 0.1).toFixed(1));
-            } else if (sellPrice - 10 < 0) {
+            // 将 sellPrice 步进
+            if (sellPrice - 8 < 0) {
               sellPrice = parseFloat((sellPrice + 0.01).toFixed(2));
+            } else if (sellPrice - 8 >= 0 && sellPrice - 100 < 0) {
+              sellPrice = parseFloat((sellPrice + 0.1).toFixed(1));
+            } else if (sellPrice - 100 >= 0 && sellPrice - 500 < 0) {
+              sellPrice = parseFloat((sellPrice + 0.2).toFixed(1));
+            } else if (sellPrice - 500 >= 0 && sellPrice - 2000 < 0) {
+              sellPrice = parseFloat((sellPrice + 0.5).toFixed(1));
+            } else if (sellPrice - 2000 >= 0) {
+              sellPrice = parseFloat((sellPrice + 1).toFixed(0));
             }
 
             // Logger.log('maxProfitPerHour:'+maxProfitPerHour+',maxSalesPerUnitPerHour:'+maxSalesPerUnitPerHour)
@@ -455,13 +474,23 @@ function optionAllValues(optionData, replacedList, dataValues, count, calculator
           var modeledUnitsSoldAnHour = dataValues[j][13]
 
           // 将起始值和结束值保存为数字，而不是字符串
-          if (averagePrice - 10 > 0) {
-            startSellPrice = parseFloat((averagePrice * 0.8).toFixed(1));
-            endSellPrice = parseFloat((averagePrice * 1.2).toFixed(1));
-          } else if (averagePrice - 10 <= 0) {
-            startSellPrice = parseFloat((averagePrice * 0.8).toFixed(2));
-            endSellPrice = parseFloat((averagePrice * 1.2).toFixed(2));
+          if (averagePrice * 0.5 - 2000 >= 0) {
+            startSellPrice = parseFloat((Math.floor(averagePrice / 1) * 1).toFixed(0));
+            endSellPrice = parseFloat((averagePrice * 5).toFixed(1));
+          } else if (averagePrice * 0.5 - 500 >= 0 && averagePrice * 0.5 - 2000 < 0) {
+            startSellPrice = parseFloat((Math.floor(averagePrice / 0.5) * 0.5).toFixed(1));
+            endSellPrice = parseFloat((averagePrice * 5).toFixed(1));
+          } else if (averagePrice * 0.5 - 100 >= 0 && averagePrice * 0.5 - 500 < 0) {
+            startSellPrice = parseFloat((Math.floor(averagePrice / 0.5) * 0.5).toFixed(1));
+            endSellPrice = parseFloat((averagePrice * 5).toFixed(1));
+          } else if (averagePrice * 0.5 - 8 >= 0 && averagePrice * 0.5 - 100 < 0) {
+            startSellPrice = parseFloat((averagePrice * 0.5).toFixed(1));
+            endSellPrice = parseFloat((averagePrice * 5).toFixed(1));
+          } else if (averagePrice * 0.5 - 8 < 0) {
+            startSellPrice = parseFloat((averagePrice * 0.5).toFixed(2));
+            endSellPrice = parseFloat((averagePrice * 5).toFixed(2));
           }
+
 
           // 初始化 sellPrice 为起始值
           var sellPrice = startSellPrice;
@@ -484,7 +513,7 @@ function optionAllValues(optionData, replacedList, dataValues, count, calculator
             var vNr_s = vNr_a / 2 + 0.5
             var vNr_l = quality / 12
             var vNr_d = 2 * PROFIT_PER_BUILDING_LEVEL * (buildingLevelsNeededPerHour + 1) * (vNr_a * (1 + vNr_l * RETAIL_MODELING_QUALITY_WEIGHT)) + ((g_modeledStoreWages = modeledStoreWages) != null ? g_modeledStoreWages : 0)
-            var vNr_u = modeledUnitsSoldAnHour * vNr_s 
+            var vNr_u = modeledUnitsSoldAnHour * vNr_s
 
             // bNr函数 bNr(d, be.modeledProductionCostPerUnit, u, (f = be.modeledStoreWages) != null ? f : 0)
             var vNr_h = modeledProductionCostPerUnit + (vNr_d + ((f_modeledStoreWages = modeledStoreWages) != null ? f_modeledStoreWages : 0)) / vNr_u
@@ -500,7 +529,10 @@ function optionAllValues(optionData, replacedList, dataValues, count, calculator
               if (sj_y < 1) {
                 var sj_w = sj_g * (1 + sj_y) / acceleration_multiplier / 1;
                 var Jq_d = sj_w - sj_w * A2Value / 100
+              } else if (sj_y >= 1 && sellPrice > averagePrice) {
+                break;
               }
+
             } else {
               var sj_w = (sj_y * sj_f + (1 - sj_y) * sj_g) / acceleration_multiplier / 1;
               var Jq_d = sj_w - sj_w * A2Value / 100
@@ -547,11 +579,17 @@ function optionAllValues(optionData, replacedList, dataValues, count, calculator
               optimalSellPrice = sellPrice;
             }
 
-            // 将 sellPrice 增加 0.1
-            if (sellPrice - 10 >= 0) {
-              sellPrice = parseFloat((sellPrice + 0.1).toFixed(1));
-            } else if (sellPrice - 10 < 0) {
+            // 将 sellPrice 步进
+            if (sellPrice - 8 < 0) {
               sellPrice = parseFloat((sellPrice + 0.01).toFixed(2));
+            } else if (sellPrice - 8 >= 0 && sellPrice - 100 < 0) {
+              sellPrice = parseFloat((sellPrice + 0.1).toFixed(1));
+            } else if (sellPrice - 100 >= 0 && sellPrice - 500 < 0) {
+              sellPrice = parseFloat((sellPrice + 0.2).toFixed(1));
+            } else if (sellPrice - 500 >= 0 && sellPrice - 2000 < 0) {
+              sellPrice = parseFloat((sellPrice + 0.5).toFixed(1));
+            } else if (sellPrice - 2000 >= 0) {
+              sellPrice = parseFloat((sellPrice + 1).toFixed(0));
             }
 
             Logger.log(sellPrice)
@@ -629,13 +667,23 @@ function marketAllValues(marketData, replacedList, dataValues, count, calculator
           var modeledUnitsSoldAnHour = dataValues[j][13]
 
           // 将起始值和结束值保存为数字，而不是字符串
-          if (averagePrice - 10 > 0) {
-            startSellPrice = parseFloat((averagePrice * 0.8).toFixed(1));
-            endSellPrice = parseFloat((averagePrice * 1.2).toFixed(1));
-          } else if (averagePrice - 10 <= 0) {
-            startSellPrice = parseFloat((averagePrice * 0.8).toFixed(2));
-            endSellPrice = parseFloat((averagePrice * 1.2).toFixed(2));
+          if (averagePrice * 0.5 - 2000 >= 0) {
+            startSellPrice = parseFloat((Math.floor(averagePrice / 1) * 1).toFixed(0));
+            endSellPrice = parseFloat((averagePrice * 5).toFixed(1));
+          } else if (averagePrice * 0.5 - 500 >= 0 && averagePrice * 0.5 - 2000 < 0) {
+            startSellPrice = parseFloat((Math.floor(averagePrice / 0.5) * 0.5).toFixed(1));
+            endSellPrice = parseFloat((averagePrice * 5).toFixed(1));
+          } else if (averagePrice * 0.5 - 100 >= 0 && averagePrice * 0.5 - 500 < 0) {
+            startSellPrice = parseFloat((Math.floor(averagePrice / 0.5) * 0.5).toFixed(1));
+            endSellPrice = parseFloat((averagePrice * 5).toFixed(1));
+          } else if (averagePrice * 0.5 - 8 >= 0 && averagePrice * 0.5 - 100 < 0) {
+            startSellPrice = parseFloat((averagePrice * 0.5).toFixed(1));
+            endSellPrice = parseFloat((averagePrice * 5).toFixed(1));
+          } else if (averagePrice * 0.5 - 8 < 0) {
+            startSellPrice = parseFloat((averagePrice * 0.5).toFixed(2));
+            endSellPrice = parseFloat((averagePrice * 5).toFixed(2));
           }
+
 
           // 初始化 sellPrice 为起始值
           var sellPrice = startSellPrice;
@@ -658,8 +706,8 @@ function marketAllValues(marketData, replacedList, dataValues, count, calculator
             var vNr_s = vNr_a / 2 + 0.5
             var vNr_l = quality / 12
             var vNr_d = 2 * PROFIT_PER_BUILDING_LEVEL * (buildingLevelsNeededPerHour + 1) * (vNr_a * (1 + vNr_l * RETAIL_MODELING_QUALITY_WEIGHT)) + ((g_modeledStoreWages = modeledStoreWages) != null ? g_modeledStoreWages : 0)
-            var vNr_u = modeledUnitsSoldAnHour * vNr_s 
-          
+            var vNr_u = modeledUnitsSoldAnHour * vNr_s
+
             // bNr函数 bNr(d, be.modeledProductionCostPerUnit, u, (f = be.modeledStoreWages) != null ? f : 0)
             var vNr_h = modeledProductionCostPerUnit + (vNr_d + ((f_modeledStoreWages = modeledStoreWages) != null ? f_modeledStoreWages : 0)) / vNr_u
 
@@ -674,7 +722,10 @@ function marketAllValues(marketData, replacedList, dataValues, count, calculator
               if (sj_y < 1) {
                 var sj_w = sj_g * (1 + sj_y) / acceleration_multiplier / 1;
                 var Jq_d = sj_w - sj_w * A2Value / 100
+              } else if (sj_y >= 1 && sellPrice > averagePrice) {
+                break;
               }
+
             } else {
               var sj_w = (sj_y * sj_f + (1 - sj_y) * sj_g) / acceleration_multiplier / 1;
               var Jq_d = sj_w - sj_w * A2Value / 100
@@ -716,11 +767,17 @@ function marketAllValues(marketData, replacedList, dataValues, count, calculator
               optimalSellPrice = sellPrice;
             }
 
-            // 将 sellPrice 增加 0.1
-            if (sellPrice - 10 >= 0) {
-              sellPrice = parseFloat((sellPrice + 0.1).toFixed(1));
-            } else if (sellPrice - 10 < 0) {
+            // 将 sellPrice 步进
+            if (sellPrice - 8 < 0) {
               sellPrice = parseFloat((sellPrice + 0.01).toFixed(2));
+            } else if (sellPrice - 8 >= 0 && sellPrice - 100 < 0) {
+              sellPrice = parseFloat((sellPrice + 0.1).toFixed(1));
+            } else if (sellPrice - 100 >= 0 && sellPrice - 500 < 0) {
+              sellPrice = parseFloat((sellPrice + 0.2).toFixed(1));
+            } else if (sellPrice - 500 >= 0 && sellPrice - 2000 < 0) {
+              sellPrice = parseFloat((sellPrice + 0.5).toFixed(1));
+            } else if (sellPrice - 2000 >= 0) {
+              sellPrice = parseFloat((sellPrice + 1).toFixed(0));
             }
 
             Logger.log(sellPrice)
