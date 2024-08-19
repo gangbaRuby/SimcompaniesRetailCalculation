@@ -304,7 +304,7 @@ function calculateOptimalCosts(sheet, realm) { //计算指定时利润下,最大
 
             // 更新最大值及对应的成本价
 
-            if (p - maxp > 0 && p <= 2 * modeledProductionCostPerUnit && p >= modeledProductionCostPerUnit) {
+            if (p - maxp > 0 && p <= 10 * modeledProductionCostPerUnit && p >= modeledProductionCostPerUnit) {
               maxp = p;
               maxSalesPerUnitPerHour = salesPerUnitPerHour;
               optimalSellPrice = sellPrice;
@@ -321,13 +321,9 @@ function calculateOptimalCosts(sheet, realm) { //计算指定时利润下,最大
             // 将 sellPrice 步进
             if (sellPrice - 8 < 0) {
               sellPrice = parseFloat((sellPrice + 0.01).toFixed(2));
-            } else if (sellPrice - 8 >= 0 && sellPrice - 100 < 0) {
+            } else if (sellPrice - 2001 < 0) {
               sellPrice = parseFloat((sellPrice + 0.1).toFixed(1));
-            } else if (sellPrice - 100 >= 0 && sellPrice - 500 < 0) {
-              sellPrice = parseFloat((sellPrice + 0.2).toFixed(1));
-            } else if (sellPrice - 500 >= 0 && sellPrice - 2000 < 0) {
-              sellPrice = parseFloat((sellPrice + 0.5).toFixed(1));
-            } else if (sellPrice - 2000 >= 0) {
+            } else {
               sellPrice = parseFloat((sellPrice + 1).toFixed(0));
             }
 
@@ -523,13 +519,9 @@ function calculateCostAllValues(cost, averagePrice, marketSaturation, marketSatu
     // 将 sellPrice 步进
     if (sellPrice - 8 < 0) {
       sellPrice = parseFloat((sellPrice + 0.01).toFixed(2));
-    } else if (sellPrice - 8 >= 0 && sellPrice - 100 < 0) {
+    } else if (sellPrice - 2001 < 0) {
       sellPrice = parseFloat((sellPrice + 0.1).toFixed(1));
-    } else if (sellPrice - 100 >= 0 && sellPrice - 500 < 0) {
-      sellPrice = parseFloat((sellPrice + 0.2).toFixed(1));
-    } else if (sellPrice - 500 >= 0 && sellPrice - 2000 < 0) {
-      sellPrice = parseFloat((sellPrice + 0.5).toFixed(1));
-    } else if (sellPrice - 2000 >= 0) {
+    } else {
       sellPrice = parseFloat((sellPrice + 1).toFixed(0));
     }
   }

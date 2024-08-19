@@ -322,13 +322,9 @@ function calculateAllValues(sheet, realm) { //计算最大时利润
             // 将 sellPrice 步进
             if (sellPrice - 8 < 0) {
               sellPrice = parseFloat((sellPrice + 0.01).toFixed(2));
-            } else if (sellPrice - 8 >= 0 && sellPrice - 100 < 0) {
+            } else if (sellPrice - 2001 < 0) {
               sellPrice = parseFloat((sellPrice + 0.1).toFixed(1));
-            } else if (sellPrice - 100 >= 0 && sellPrice - 500 < 0) {
-              sellPrice = parseFloat((sellPrice + 0.2).toFixed(1));
-            } else if (sellPrice - 500 >= 0 && sellPrice - 2000 < 0) {
-              sellPrice = parseFloat((sellPrice + 0.5).toFixed(1));
-            } else if (sellPrice - 2000 >= 0) {
+            } else {
               sellPrice = parseFloat((sellPrice + 1).toFixed(0));
             }
 
@@ -582,13 +578,9 @@ function optionAllValues(optionData, replacedList, dataValues, count, calculator
             // 将 sellPrice 步进
             if (sellPrice - 8 < 0) {
               sellPrice = parseFloat((sellPrice + 0.01).toFixed(2));
-            } else if (sellPrice - 8 >= 0 && sellPrice - 100 < 0) {
+            } else if (sellPrice - 2001 < 0) {
               sellPrice = parseFloat((sellPrice + 0.1).toFixed(1));
-            } else if (sellPrice - 100 >= 0 && sellPrice - 500 < 0) {
-              sellPrice = parseFloat((sellPrice + 0.2).toFixed(1));
-            } else if (sellPrice - 500 >= 0 && sellPrice - 2000 < 0) {
-              sellPrice = parseFloat((sellPrice + 0.5).toFixed(1));
-            } else if (sellPrice - 2000 >= 0) {
+            } else {
               sellPrice = parseFloat((sellPrice + 1).toFixed(0));
             }
 
@@ -770,13 +762,9 @@ function marketAllValues(marketData, replacedList, dataValues, count, calculator
             // 将 sellPrice 步进
             if (sellPrice - 8 < 0) {
               sellPrice = parseFloat((sellPrice + 0.01).toFixed(2));
-            } else if (sellPrice - 8 >= 0 && sellPrice - 100 < 0) {
+            } else if (sellPrice - 2001 < 0) {
               sellPrice = parseFloat((sellPrice + 0.1).toFixed(1));
-            } else if (sellPrice - 100 >= 0 && sellPrice - 500 < 0) {
-              sellPrice = parseFloat((sellPrice + 0.2).toFixed(1));
-            } else if (sellPrice - 500 >= 0 && sellPrice - 2000 < 0) {
-              sellPrice = parseFloat((sellPrice + 0.5).toFixed(1));
-            } else if (sellPrice - 2000 >= 0) {
+            } else {
               sellPrice = parseFloat((sellPrice + 1).toFixed(0));
             }
 
