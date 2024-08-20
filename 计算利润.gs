@@ -54,9 +54,12 @@ function calculateOptimalCosts(sheet, realm) { //计算指定时利润下,最大
   var PROFIT_PER_BUILDING_LEVEL = calculatorSheet.getRange("H6").getValue();
   var RETAIL_MODELING_QUALITY_WEIGHT = calculatorSheet.getRange("J6").getValue();
   var acceleration_multiplier = calculatorSheet.getRange("F3").getValue();
+  var upLimit = calculatorSheet.getRange("L1").getValue();
+  var downlimit = calculatorSheet.getRange("L2").getValue();
+
 
   // 获取选中的物品ID
-  var select_range = calculatorSheet.getRange("M1:T14");
+  var select_range = calculatorSheet.getRange("O1:V14");
   var values = select_range.getValues();
   var output = [];
   for (var row = 1; row < values.length; row++) { // 从第二行开始
@@ -127,11 +130,11 @@ function calculateOptimalCosts(sheet, realm) { //计算指定时利润下,最大
 
   // 获取选中的品质
   // 获取 M17:R20 范围
-  var range1 = calculatorSheet.getRange("M17:R18");
+  var range1 = calculatorSheet.getRange("O17:T18");
   var quality_values1 = range1.getValues();
   // Logger.log(quality_values1)
   // 获取 L19:R20 范围
-  var range2 = calculatorSheet.getRange("L19:R20");
+  var range2 = calculatorSheet.getRange("N19:T20");
   var quality_values2 = range2.getValues();
   // Logger.log(quality_values2)
   // 将两个范围的值合并为一个数组
@@ -207,6 +210,8 @@ function calculateOptimalCosts(sheet, realm) { //计算指定时利润下,最大
         var modeledStoreWages = dataValues[j][12]
         var modeledUnitsSoldAnHour = dataValues[j][13]
 
+        var n = building_wages * B2Value / 100;
+
         // 使用 while 循环来遍历范围
         for (k = 0; k < quality_replacedList.length; k++) {
 
@@ -216,22 +221,18 @@ function calculateOptimalCosts(sheet, realm) { //计算指定时利润下,最大
           var maxSalesPerUnitPerHour = 0;
           var optimalSellPrice = 0;
 
+
+
           // 将起始值和结束值保存为数字，而不是字符串
-          if (averagePrice * 0.5 - 2000 >= 0) {
-            startSellPrice = parseFloat((Math.floor(averagePrice / 1) * 1).toFixed(0));
-            endSellPrice = parseFloat((averagePrice * 5).toFixed(1));
-          } else if (averagePrice * 0.5 - 500 >= 0 && averagePrice * 0.5 - 2000 < 0) {
-            startSellPrice = parseFloat((Math.floor(averagePrice / 0.5) * 0.5).toFixed(1));
-            endSellPrice = parseFloat((averagePrice * 5).toFixed(1));
-          } else if (averagePrice * 0.5 - 100 >= 0 && averagePrice * 0.5 - 500 < 0) {
-            startSellPrice = parseFloat((Math.floor(averagePrice / 0.5) * 0.5).toFixed(1));
-            endSellPrice = parseFloat((averagePrice * 5).toFixed(1));
-          } else if (averagePrice * 0.5 - 8 >= 0 && averagePrice * 0.5 - 100 < 0) {
-            startSellPrice = parseFloat((averagePrice * 0.5).toFixed(1));
-            endSellPrice = parseFloat((averagePrice * 5).toFixed(1));
-          } else if (averagePrice * 0.5 - 8 < 0) {
-            startSellPrice = parseFloat((averagePrice * 0.5).toFixed(2));
-            endSellPrice = parseFloat((averagePrice * 5).toFixed(2));
+          if (averagePrice - 8 < 0) {
+            var startSellPrice = parseFloat((Math.floor(averagePrice * downlimit / 0.01) * 0.01).toFixed(2));
+            var endSellPrice = parseFloat((averagePrice * upLimit).toFixed(2));
+          } else if (averagePrice - 2001 < 0) {
+            var startSellPrice = parseFloat((Math.floor(averagePrice * downlimit / 0.1) * 0.1).toFixed(1));
+            var endSellPrice = parseFloat((averagePrice * upLimit).toFixed(1));
+          } else {
+            var startSellPrice = parseFloat((Math.floor(averagePrice * downlimit / 1) * 1).toFixed(0));
+            var endSellPrice = parseFloat((averagePrice * upLimit).toFixed(0));
           }
 
 
@@ -260,7 +261,7 @@ function calculateOptimalCosts(sheet, realm) { //计算指定时利润下,最大
             var vNr_a = Math.min(Math.max(2 - marketSaturation, 0), 2)
             var vNr_s = vNr_a / 2 + 0.5
             var vNr_l = quality / 12
-            var vNr_d = 2 * PROFIT_PER_BUILDING_LEVEL * (buildingLevelsNeededPerHour + 1) * (vNr_a * (1 + vNr_l * RETAIL_MODELING_QUALITY_WEIGHT)) + ((g_modeledStoreWages = modeledStoreWages) != null ? g_modeledStoreWages : 0)
+            var vNr_d = 2 * PROFIT_PER_BUILDING_LEVEL * (buildingLevelsNeededPerHour + 1) * (vNr_a / 2 * (1 + vNr_l * RETAIL_MODELING_QUALITY_WEIGHT)) + ((g_modeledStoreWages = modeledStoreWages) != null ? g_modeledStoreWages : 0)
             var vNr_u = modeledUnitsSoldAnHour * vNr_s
 
             // bNr函数 bNr(d, be.modeledProductionCostPerUnit, u, (f = be.modeledStoreWages) != null ? f : 0)
@@ -293,7 +294,7 @@ function calculateOptimalCosts(sheet, realm) { //计算指定时利润下,最大
             var y = (s * sellPrice).toFixed(1);
 
             // 计算公式N
-            var n = building_wages * B2Value / 100;
+            // var n = building_wages * B2Value / 100;
 
             // 计算每小时销售/单位
             var salesPerUnitPerHour = (s * C2Value).toFixed(2);
@@ -347,7 +348,7 @@ function calculateOptimalCosts(sheet, realm) { //计算指定时利润下,最大
           // 将每小时利润放到计算利润表中
           calculatorSheet.getRange("F" + (count + 9)).setValue(profitPerHour);
 
-          var [optimalSellPrice1, maxSalesPerUnitPerHour1, maxProfitPerHour1] = calculateCostAllValues(maxp, averagePrice, marketSaturation, marketSaturationDiv, power, xMultiplier, xOffsetBase, yMultiplier, yOffset, building_wages, quality, A2Value, B2Value, C2Value, PROFIT_BASED_MODELING_WEIGHT, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, buildingLevelsNeededPerHour, modeledProductionCostPerUnit, modeledStoreWages, modeledUnitsSoldAnHour);
+          var [optimalSellPrice1, maxSalesPerUnitPerHour1, maxProfitPerHour1] = calculateCostAllValues(maxp, averagePrice, marketSaturation, marketSaturationDiv, power, xMultiplier, xOffsetBase, yMultiplier, yOffset, building_wages, quality, A2Value, B2Value, C2Value, PROFIT_BASED_MODELING_WEIGHT, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, buildingLevelsNeededPerHour, modeledProductionCostPerUnit, modeledStoreWages, modeledUnitsSoldAnHour, upLimit, downlimit);
 
           // 将售价放到计算器表中
           calculatorSheet.getRange("G" + (count + 9)).setValue(optimalSellPrice1);
@@ -402,30 +403,39 @@ function calculateOptimalCosts(sheet, realm) { //计算指定时利润下,最大
   calculatorSheet.getRange(6, 3).setValue(formattedTime);
 }
 
-function calculateCostAllValues(cost, averagePrice, marketSaturation, marketSaturationDiv, power, xMultiplier, xOffsetBase, yMultiplier, yOffset, building_wages, quality, A2Value, B2Value, C2Value, PROFIT_BASED_MODELING_WEIGHT, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, buildingLevelsNeededPerHour, modeledProductionCostPerUnit, modeledStoreWages, modeledUnitsSoldAnHour) { //根据算出的成本计算最大时利润
+function calculateCostAllValues(cost, averagePrice, marketSaturation, marketSaturationDiv, power, xMultiplier, xOffsetBase, yMultiplier, yOffset, building_wages, quality, A2Value, B2Value, C2Value, PROFIT_BASED_MODELING_WEIGHT, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, buildingLevelsNeededPerHour, modeledProductionCostPerUnit, modeledStoreWages, modeledUnitsSoldAnHour, upLimit, downlimit) { //根据算出的成本计算最大时利润
 
   var maxProfitPerHour = 0;
   var maxSalesPerUnitPerHour = 0;
   var optimalSellPrice = 0;
 
+  var p = cost;
+  var n = building_wages * B2Value / 100;
 
-  // 将起始值和结束值保存为数字，而不是字符串
-  if (averagePrice * 0.5 - 2000 >= 0) {
-    startSellPrice = parseFloat((Math.floor(averagePrice / 1) * 1).toFixed(0));
-    endSellPrice = parseFloat((averagePrice * 5).toFixed(1));
-  } else if (averagePrice * 0.5 - 500 >= 0 && averagePrice * 0.5 - 2000 < 0) {
-    startSellPrice = parseFloat((Math.floor(averagePrice / 0.5) * 0.5).toFixed(1));
-    endSellPrice = parseFloat((averagePrice * 5).toFixed(1));
-  } else if (averagePrice * 0.5 - 100 >= 0 && averagePrice * 0.5 - 500 < 0) {
-    startSellPrice = parseFloat((Math.floor(averagePrice / 0.5) * 0.5).toFixed(1));
-    endSellPrice = parseFloat((averagePrice * 5).toFixed(1));
-  } else if (averagePrice * 0.5 - 8 >= 0 && averagePrice * 0.5 - 100 < 0) {
-    startSellPrice = parseFloat((averagePrice * 0.5).toFixed(1));
-    endSellPrice = parseFloat((averagePrice * 5).toFixed(1));
-  } else if (averagePrice * 0.5 - 8 < 0) {
-    startSellPrice = parseFloat((averagePrice * 0.5).toFixed(2));
-    endSellPrice = parseFloat((averagePrice * 5).toFixed(2));
+  if (downlimit = -1) { // -1 成本价
+    if (p - 8 < 0) {
+      var startSellPrice = parseFloat((Math.floor(p / 0.01) * 0.01).toFixed(2));
+      var endSellPrice = parseFloat((p * upLimit).toFixed(2));
+    } else if (p - 2001 < 0) {
+      var startSellPrice = parseFloat((Math.floor(p / 0.1) * 0.1).toFixed(1));
+      var endSellPrice = parseFloat((p * upLimit).toFixed(1));
+    } else {
+      var startSellPrice = parseFloat((Math.floor(p / 1) * 1).toFixed(0));
+      var endSellPrice = parseFloat((p * upLimit).toFixed(0));
+    }
+  } else {
+    if (averagePrice - 8 < 0) {
+      var startSellPrice = parseFloat((Math.floor(averagePrice * downlimit / 0.01) * 0.01).toFixed(2));
+      var endSellPrice = parseFloat((averagePrice * upLimit).toFixed(2));
+    } else if (averagePrice - 2001 < 0) {
+      var startSellPrice = parseFloat((Math.floor(averagePrice * downlimit / 0.1) * 0.1).toFixed(1));
+      var endSellPrice = parseFloat((averagePrice * upLimit).toFixed(1));
+    } else {
+      var startSellPrice = parseFloat((Math.floor(averagePrice * downlimit / 1) * 1).toFixed(0));
+      var endSellPrice = parseFloat((averagePrice * upLimit).toFixed(0));
+    }
   }
+
 
   // 初始化 sellPrice 为起始值
   var sellPrice = startSellPrice;
@@ -448,7 +458,7 @@ function calculateCostAllValues(cost, averagePrice, marketSaturation, marketSatu
     var vNr_a = Math.min(Math.max(2 - marketSaturation, 0), 2)
     var vNr_s = vNr_a / 2 + 0.5
     var vNr_l = quality / 12
-    var vNr_d = 2 * PROFIT_PER_BUILDING_LEVEL * (buildingLevelsNeededPerHour + 1) * (vNr_a * (1 + vNr_l * RETAIL_MODELING_QUALITY_WEIGHT)) + ((g_modeledStoreWages = modeledStoreWages) != null ? g_modeledStoreWages : 0)
+    var vNr_d = 2 * PROFIT_PER_BUILDING_LEVEL * (buildingLevelsNeededPerHour + 1) * (vNr_a / 2 * (1 + vNr_l * RETAIL_MODELING_QUALITY_WEIGHT)) + ((g_modeledStoreWages = modeledStoreWages) != null ? g_modeledStoreWages : 0)
     var vNr_u = modeledUnitsSoldAnHour * vNr_s
 
     // bNr函数 bNr(d, be.modeledProductionCostPerUnit, u, (f = be.modeledStoreWages) != null ? f : 0)
@@ -481,10 +491,10 @@ function calculateCostAllValues(cost, averagePrice, marketSaturation, marketSatu
     var y = (s * sellPrice).toFixed(1);
 
     // 计算公式N
-    var n = building_wages * B2Value / 100;
+    // var n = building_wages * B2Value / 100;
 
     // 计算p的值 物品成本
-    var p = cost;
+    // var p = cost;
 
     // 计算公式_
     var underscore = p * s + building_wages + n;

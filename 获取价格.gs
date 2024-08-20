@@ -3,7 +3,7 @@ function onEdit6(e) {
   var sheet = range.getSheet();
 
   // 检查是否在“R1计算器”工作表中编辑了单元格 Q25，并且值为 TRUE
-  if ((sheet.getName() == "R1计算器" && range.getRow() == 25 && range.getColumn() == 17 && range.getValue() == true) || (sheet.getName() == "R1计算器（最大销售速度）" && range.getRow() == 25 && range.getColumn() == 17 && range.getValue() == true)) {
+  if ((sheet.getName() == "R1计算器" && range.getRow() == 25 && range.getColumn() == 19 && range.getValue() == true) || (sheet.getName() == "R1计算器（最大销售速度）" && range.getRow() == 25 && range.getColumn() == 19 && range.getValue() == true)) {
     // 调用 get_price 函数 参数R1计算器
     var R1 = 0;
     get_price(sheet.getName(), R1);
@@ -13,7 +13,7 @@ function onEdit6(e) {
   }
 
   // 检查是否在“R2计算器”工作表中编辑了单元格 Q25，并且值为 TRUE
-  if ((sheet.getName() == "R2计算器" && range.getRow() == 25 && range.getColumn() == 17 && range.getValue() == true) || (sheet.getName() == "R2计算器（最大销售速度）" && range.getRow() == 25 && range.getColumn() == 17 && range.getValue() == true)) {
+  if ((sheet.getName() == "R2计算器" && range.getRow() == 25 && range.getColumn() == 19 && range.getValue() == true) || (sheet.getName() == "R2计算器（最大销售速度）" && range.getRow() == 25 && range.getColumn() == 19 && range.getValue() == true)) {
     // 调用 get_price 函数 参数R1计算器
     var R2 = 1;
     get_price(sheet.getName(), R2);
@@ -29,7 +29,7 @@ function get_price(sheet, realm) {
   var calculatorSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheet);
 
   // 获取选中的物品ID
-  var select_range = calculatorSheet.getRange("M1:T14");
+  var select_range = calculatorSheet.getRange("O1:V14");
   var values = select_range.getValues();
   var output = [];
   for (var row = 1; row < values.length; row++) { // 从第二行开始
@@ -126,7 +126,7 @@ function get_price(sheet, realm) {
   var headers = ["物品ID", "品质", "采购和退货"];
 
   // 清除现有数据
-  calculatorSheet.getRange("P27:R").clearContent();
+  calculatorSheet.getRange("R27:T").clearContent();
 
   // 将计算出的最小价格数据写入 Google Sheets
   var filteredData = [];
@@ -138,7 +138,7 @@ function get_price(sheet, realm) {
   }
 
   if (filteredData.length > 0) {
-    calculatorSheet.getRange(27, 16, filteredData.length, headers.length).setValues(filteredData);
+    calculatorSheet.getRange(27, 18, filteredData.length, headers.length).setValues(filteredData);
   }
 
   // 创建一个新的 Date 对象，表示当前时间
@@ -162,7 +162,7 @@ function get_price(sheet, realm) {
   var formattedTime = date + "日 " + hours + ":" + minutes;
 
   // 在 R25 单元格设置格式化时间
-  calculatorSheet.getRange(25, 18).setValue(formattedTime);
+  calculatorSheet.getRange(25, 20).setValue(formattedTime);
 
 
 
