@@ -224,16 +224,33 @@ function calculateOptimalCosts(sheet, realm) { //计算指定时利润下,最大
 
 
           // 将起始值和结束值保存为数字，而不是字符串
-          if (averagePrice - 8 < 0) {
-            var startSellPrice = parseFloat((Math.floor(averagePrice * downlimit / 0.01) * 0.01).toFixed(2));
-            var endSellPrice = parseFloat((averagePrice * upLimit).toFixed(2));
-          } else if (averagePrice - 2001 < 0) {
-            var startSellPrice = parseFloat((Math.floor(averagePrice * downlimit / 0.1) * 0.1).toFixed(1));
-            var endSellPrice = parseFloat((averagePrice * upLimit).toFixed(1));
+          if (downlimit < 0) {
+            var downlimit1 = 0.1
+            if (averagePrice - 8 < 0) {
+              var startSellPrice = parseFloat((Math.floor(averagePrice * downlimit1 / 0.01) * 0.01).toFixed(2));
+              var endSellPrice = parseFloat((averagePrice * upLimit).toFixed(2));
+            } else if (averagePrice - 2001 < 0) {
+              var startSellPrice = parseFloat((Math.floor(averagePrice * downlimit1 / 0.1) * 0.1).toFixed(1));
+              var endSellPrice = parseFloat((averagePrice * upLimit).toFixed(1));
+            } else {
+              var startSellPrice = parseFloat((Math.floor(averagePrice * downlimit1 / 1) * 1).toFixed(0));
+              var endSellPrice = parseFloat((averagePrice * upLimit).toFixed(0));
+            }
           } else {
-            var startSellPrice = parseFloat((Math.floor(averagePrice * downlimit / 1) * 1).toFixed(0));
-            var endSellPrice = parseFloat((averagePrice * upLimit).toFixed(0));
+            if (averagePrice - 8 < 0) {
+              var startSellPrice = parseFloat((Math.floor(averagePrice * downlimit / 0.01) * 0.01).toFixed(2));
+              var endSellPrice = parseFloat((averagePrice * upLimit).toFixed(2));
+            } else if (averagePrice - 2001 < 0) {
+              var startSellPrice = parseFloat((Math.floor(averagePrice * downlimit / 0.1) * 0.1).toFixed(1));
+              var endSellPrice = parseFloat((averagePrice * upLimit).toFixed(1));
+            } else {
+              var startSellPrice = parseFloat((Math.floor(averagePrice * downlimit / 1) * 1).toFixed(0));
+              var endSellPrice = parseFloat((averagePrice * upLimit).toFixed(0));
+            }
           }
+
+
+
 
 
 
