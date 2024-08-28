@@ -61,6 +61,7 @@ function calculateSaleSpeed(sheet, realm) { //计算最大时利润
   var acceleration_multiplier = calculatorSheet.getRange("F3").getValue();
   var upLimit = calculatorSheet.getRange("L1").getValue();
   var downlimit = calculatorSheet.getRange("L2").getValue();
+  var mpDiscount = calculatorSheet.getRange("U26").getValue();
 
 
   // 获取选中的物品ID
@@ -358,7 +359,7 @@ function calculateSaleSpeed(sheet, realm) { //计算最大时利润
 
   var marketButton = calculatorSheet.getRange("F5").getValue();
   if (marketButton) {
-    marketSpeed(marketData, replacedList, dataValues, count, calculatorSheet, A2Value, B2Value, C2Value, getChineseItem, PROFIT_BASED_MODELING_WEIGHT, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, upLimit, downlimit);
+    marketSpeed(marketData, replacedList, dataValues, count, calculatorSheet, A2Value, B2Value, C2Value, getChineseItem, PROFIT_BASED_MODELING_WEIGHT, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, upLimit, downlimit, mpDiscount);
   }
 
 
@@ -599,7 +600,7 @@ function optionSpeed(optionData, replacedList, dataValues, count, calculatorShee
 }
 
 
-function marketSpeed(marketData, replacedList, dataValues, count, calculatorSheet, A2Value, B2Value, C2Value, getChineseItem, PROFIT_BASED_MODELING_WEIGHT, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, upLimit, downlimit) {//市场价
+function marketSpeed(marketData, replacedList, dataValues, count, calculatorSheet, A2Value, B2Value, C2Value, getChineseItem, PROFIT_BASED_MODELING_WEIGHT, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, upLimit, downlimit, mpDiscount) {//市场价
 
   count++;
 
@@ -610,7 +611,7 @@ function marketSpeed(marketData, replacedList, dataValues, count, calculatorShee
     if (replacedList.includes(db_letter)) {
 
       var quality = marketData[i][1];
-      var market = marketData[i][2]; // 获取采购和退货
+      var market = marketData[i][2] * (1 - mpDiscount/100); // 获取采购和退货
 
 
       var maxProfitPerHour = 0;

@@ -27,6 +27,7 @@ function onEdit6(e) {
 function get_price(sheet, realm) {
 
   var calculatorSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheet);
+  var mpDiscount = calculatorSheet.getRange("U26").getValue();
 
   // 获取选中的物品ID
   var select_range = calculatorSheet.getRange("O1:V14");
@@ -123,17 +124,17 @@ function get_price(sheet, realm) {
   });
 
 
-  var headers = ["物品ID", "品质", "采购和退货"];
+  var headers = ["物品ID", "品质", "采购和退货", "mp-?%"];
 
   // 清除现有数据
-  calculatorSheet.getRange("R27:T").clearContent();
+  calculatorSheet.getRange("R27:U").clearContent();
 
   // 将计算出的最小价格数据写入 Google Sheets
   var filteredData = [];
   for (var key in minPriceDict) {
     if (minPriceDict.hasOwnProperty(key)) {
       var item = minPriceDict[key];
-      filteredData.push([item.kind, item.quality, item.price]);
+      filteredData.push([item.kind, item.quality, item.price, item.price * (1 - mpDiscount/100)]);
     }
   }
 
