@@ -34,15 +34,27 @@ function getEmployeesByPosition(data, position) {
   return data.filter(function (employee) {
     return employee.position === position;
   }).map(function (employee) {
-    return {
-      "name": employee.name,
-      "age": employee.age,
-      "salary": employee.salary,
-      "coo": employee.skills?.coo,
-      "cfo": employee.skills?.cfo,
-      "cmo": employee.skills?.cmo,
-      "cto": employee.skills?.cto
-    };
+    if (employee.currentTraining && employee.currentTraining.description) {
+      return {
+        "name": employee.name,
+        "age": employee.age,
+        "salary": employee.salary,
+        "coo": 0,
+        "cfo": 0,
+        "cmo": 0,
+        "cto": 0
+      };
+    } else {
+      return {
+        "name": employee.name,
+        "age": employee.age,
+        "salary": employee.salary,
+        "coo": employee.skills?.coo,
+        "cfo": employee.skills?.cfo,
+        "cmo": employee.skills?.cmo,
+        "cto": employee.skills?.cto
+      };
+    }
   });
 }
 
