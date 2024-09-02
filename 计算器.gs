@@ -40,7 +40,7 @@ function calculateAllValues(sheet, realm) { //计算最大时利润
   var inventoryData = inventoryRange.getValues();
 
   // 获取数据信息表的数据范围
-  var dataRange = dataSheet.getRange("A2:N" + dataSheet.getLastRow());
+  var dataRange = dataSheet.getRange("A2:H" + dataSheet.getLastRow());
   var dataValues = dataRange.getValues();
 
   // 获取自定义库存信息
@@ -141,7 +141,7 @@ function calculateAllValues(sheet, realm) { //计算最大时利润
 
     if (replacedList.includes(db_letter)) {
 
-      var quality = inventoryData[i][1];
+      var quality = inventoryData[i][1]; // 获取品质
       var amount = inventoryData[i][2]; // 获取数量值
       var workers = inventoryData[i][3]; // 获取工人
       var admin = inventoryData[i][4]; // 获取管理费
@@ -151,11 +151,11 @@ function calculateAllValues(sheet, realm) { //计算最大时利润
       var material4 = inventoryData[i][8]; // 获取原料4
       var material5 = inventoryData[i][9]; // 获取原料5
       var market = inventoryData[i][10]; // 获取采购和退货
+      // 以上为了计算成本
 
-
-      var maxProfitPerHour = 0;
-      var maxSalesPerUnitPerHour = 0;
-      var optimalSellPrice = 0;
+      var maxProfitPerHour = 0; // 最大时利润
+      var maxSalesPerUnitPerHour = 0; // 最大时销售速度 
+      var optimalSellPrice = 0; // 售价
 
       // 在数据信息表中查找与当前行匹配的 ID
       for (var j = 0; j < dataValues.length; j++) {
@@ -163,19 +163,13 @@ function calculateAllValues(sheet, realm) { //计算最大时利润
           // 计算公式H
           var averagePrice = dataValues[j][1];
           var marketSaturation = dataValues[j][2];
-          var marketSaturationDiv = dataValues[j][3];
-          var power = dataValues[j][4];
-          var xMultiplier = dataValues[j][5];
-          var xOffsetBase = dataValues[j][6];
-          var yMultiplier = dataValues[j][7];
-          var yOffset = dataValues[j][8];
-          var building_wages = dataValues[j][9]
-          var buildingLevelsNeededPerHour = dataValues[j][10]
-          var modeledProductionCostPerUnit = dataValues[j][11]
-          var modeledStoreWages = dataValues[j][12]
-          var modeledUnitsSoldAnHour = dataValues[j][13]
+          var building_wages = dataValues[j][3]
+          var buildingLevelsNeededPerHour = dataValues[j][4]
+          var modeledProductionCostPerUnit = dataValues[j][5]
+          var modeledStoreWages = dataValues[j][6]
+          var modeledUnitsSoldAnHour = dataValues[j][7]
 
-          var p = ((workers + admin + material1 + material2 + material3 + material4 + material5 + market) / amount).toFixed(3);
+          var p = ((workers + admin + material1 + material2 + material3 + material4 + material5 + market) / amount).toFixed(3); // 成本
           var n = building_wages * B2Value / 100;
 
           if (downlimit = -1) { // -1 成本价
@@ -189,7 +183,7 @@ function calculateAllValues(sheet, realm) { //计算最大时利润
               var startSellPrice = parseFloat((Math.floor(p / 1) * 1).toFixed(0));
               var endSellPrice = parseFloat((p * upLimit).toFixed(0));
             }
-          } else {
+          } else { // 倍率设置
             if (averagePrice - 8 < 0) {
               var startSellPrice = parseFloat((Math.floor(averagePrice * downlimit / 0.01) * 0.01).toFixed(2));
               var endSellPrice = parseFloat((averagePrice * upLimit).toFixed(2));
@@ -213,13 +207,6 @@ function calculateAllValues(sheet, realm) { //计算最大时利润
 
             var g_modeledStoreWages, f_modeledStoreWages, y_modeledStoreWages, w_modeledStoreWages
 
-            // sj函数 sj(A, ie, be, 100, h, G.averageRetailPrice, n, G.marketSaturation, $, 1)
-            var sj_h = marketSaturation < 0.3 ? marketSaturation - 0.3 : marketSaturation
-            var sj_p = Math.max(sj_h - quality * 0.24, 0.1 - 0.24 * 2)
-
-            // yNr函数 g = yNr(ie, p, 100, G.averageRetailPrice),
-            var sj_g = (Math.pow(sellPrice * xMultiplier + (xOffsetBase + (sj_p - 0.5) / marketSaturationDiv), power) * yMultiplier + yOffset) * 100
-
             // vNr函数 f = vNr(be, n, G.marketSaturation, 100, G.averageRetailPrice),
             var vNr_a = Math.min(Math.max(2 - marketSaturation, 0), 2)
             var vNr_s = vNr_a / 2 + 0.5
@@ -238,67 +225,22 @@ function calculateAllValues(sheet, realm) { //计算最大时利润
             var sj_f = 100 * ((sellPrice - modeledProductionCostPerUnit) * 3600) / (vNr_p + ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0))
             var sj_y = PROFIT_BASED_MODELING_WEIGHT
             if (sj_f <= 0) {
-              if (sj_y < 1) {
-                var sj_w = sj_g * (1 + sj_y) / acceleration_multiplier / 1;
-                var Jq_d = sj_w - sj_w * A2Value / 100
-              } else if (sj_y >= 1 && sellPrice > averagePrice) {
+              if (sj_y >= 1 && sellPrice > averagePrice) {
                 break;
               }
 
             } else {
-              var sj_w = (sj_y * sj_f + (1 - sj_y) * sj_g) / acceleration_multiplier / 1;
+              var sj_w = (sj_y * sj_f) / acceleration_multiplier / 1;
               var Jq_d = sj_w - sj_w * A2Value / 100
             }
 
             // Jq函数 Jq(A, ie, be, h, G.averageRetailPrice, n, G.marketSaturation, $, 1)
             var s = (100 * 3600 / Jq_d).toFixed(2)
 
-            // fNr函数 fNr(A,   ie, be, h != null ? h : 0, G.averageRetailPrice, n, G.marketSaturation, p != null ? p : 0, G.storeBaseSalary, $ || 1, 1)
-            // var ? = sellPrice - building_wages * (B2Value/100) / s
-
-            // var p = ((workers + admin + material1 + material2 + material3 + material4 + material5 + market) / amount).toFixed(3);
-
-
-
-            // Logger.log('sellprice:' + sellPrice + ',s:' + s)
-
             // 计算公式y
             var y = (s * sellPrice).toFixed(1);
-            // Logger.log('y:' + y)
 
 
-            // Logger.log('sj_h:' + sj_h)
-            // Logger.log('sj_p:' + sj_p)
-            // Logger.log('sj_g:' + sj_g)
-            // Logger.log('sj_w' + sj_w)
-            // Logger.log('vNr_a:' + vNr_a)
-            // Logger.log('vNr_s:' + vNr_s)
-            // Logger.log('vNr_l:' + vNr_l)
-            // Logger.log('vNr_d:' + vNr_d)
-            // Logger.log('vNr_u:' + vNr_u)
-            // Logger.log('vNr_a:' + xNr_a)
-            // Logger.log('vNr_p:' + vNr_p)
-            // Logger.log('Jq_d:' + Jq_d)
-            // Logger.log('fNr_Jq:' + fNr_Jq)
-            // Logger.log('profit:' + profit)
-
-
-
-
-
-            // // 计算H的值
-            // var h = (Math.pow(sellPrice.toFixed(2) * xMultiplier + (xOffsetBase + (Math.max(-.38, saturation - .24 * quality) - .5) / marketSaturationDiv), power) * yMultiplier + yOffset).toFixed(2);
-
-
-
-            // // 计算公式y
-            // var y = (s * sellPrice).toFixed(1);
-
-            // // 计算公式N
-            // var n = building_wages * B2Value / 100;
-
-            // // 计算p的值 物品成本
-            // var p = ((workers + admin + material1 + material2 + material3 + material4 + material5 + market) / amount).toFixed(3);
 
             // // 计算公式_
             var underscore = p * s + building_wages + n;
@@ -308,12 +250,6 @@ function calculateAllValues(sheet, realm) { //计算最大时利润
 
             // // 计算每小时销售/单位
             var salesPerUnitPerHour = (s * C2Value).toFixed(2);
-
-            // // 计算收入
-            // // var revenue = y * C2Value;
-
-            // // 计算销售成本
-            // // var salesCost = underscore * C2Value;
 
             // // 计算每小时利润
             var profitPerHour = w * C2Value;
@@ -368,14 +304,26 @@ function calculateAllValues(sheet, realm) { //计算最大时利润
           calculatorSheet.getRange("G" + (count + 9)).setValue(maxProfitPerHour);
 
           // 将销售时间放到计算器表中
-          calculatorSheet.getRange("H" + (count + 9)).setValue(sellTime);
+          if (maxProfitPerHour == 0) {
+            calculatorSheet.getRange("H" + (count + 9)).setValue(0);
+          } else {
+            calculatorSheet.getRange("H" + (count + 9)).setValue(sellTime);
+          }
 
           // 将使用商店数量(48小时)放到计算器表中
-          calculatorSheet.getRange("I" + (count + 9)).setValue(costStore);
+          if (maxProfitPerHour == 0) {
+            calculatorSheet.getRange("I" + (count + 9)).setValue(0);
+          } else {
+            calculatorSheet.getRange("I" + (count + 9)).setValue(costStore);
+          }
 
-          var singleGoodTotalProfit = (maxProfitPerHour / maxSalesPerUnitPerHour) * amount;
           // 将单品总利润放到计算器表中
-          calculatorSheet.getRange("J" + (count + 9)).setValue(singleGoodTotalProfit);
+          if (maxProfitPerHour == 0) {
+            calculatorSheet.getRange("J" + (count + 9)).setValue(0);
+          } else {
+            var singleGoodTotalProfit = (maxProfitPerHour / maxSalesPerUnitPerHour) * amount;
+            calculatorSheet.getRange("J" + (count + 9)).setValue(singleGoodTotalProfit);
+          }
 
           count++;
 
@@ -468,17 +416,11 @@ function optionAllValues(optionData, replacedList, dataValues, count, calculator
           // 计算公式H
           var averagePrice = dataValues[j][1];
           var marketSaturation = dataValues[j][2];
-          var marketSaturationDiv = dataValues[j][3];
-          var power = dataValues[j][4];
-          var xMultiplier = dataValues[j][5];
-          var xOffsetBase = dataValues[j][6];
-          var yMultiplier = dataValues[j][7];
-          var yOffset = dataValues[j][8];
-          var building_wages = dataValues[j][9]
-          var buildingLevelsNeededPerHour = dataValues[j][10]
-          var modeledProductionCostPerUnit = dataValues[j][11]
-          var modeledStoreWages = dataValues[j][12]
-          var modeledUnitsSoldAnHour = dataValues[j][13]
+          var building_wages = dataValues[j][3]
+          var buildingLevelsNeededPerHour = dataValues[j][4]
+          var modeledProductionCostPerUnit = dataValues[j][5]
+          var modeledStoreWages = dataValues[j][6]
+          var modeledUnitsSoldAnHour = dataValues[j][7]
 
           var p = market;
           var n = building_wages * B2Value / 100;
@@ -517,13 +459,6 @@ function optionAllValues(optionData, replacedList, dataValues, count, calculator
 
             var g_modeledStoreWages, f_modeledStoreWages, y_modeledStoreWages, w_modeledStoreWages
 
-            // sj函数 sj(A, ie, be, 100, h, G.averageRetailPrice, n, G.marketSaturation, $, 1)
-            var sj_h = marketSaturation < 0.3 ? marketSaturation - 0.3 : marketSaturation
-            var sj_p = Math.max(sj_h - quality * 0.24, 0.1 - 0.24 * 2)
-
-            // yNr函数 g = yNr(ie, p, 100, G.averageRetailPrice),
-            var sj_g = (Math.pow(sellPrice * xMultiplier + (xOffsetBase + (sj_p - 0.5) / marketSaturationDiv), power) * yMultiplier + yOffset) * 100
-
             // vNr函数 f = vNr(be, n, G.marketSaturation, 100, G.averageRetailPrice),
             var vNr_a = Math.min(Math.max(2 - marketSaturation, 0), 2)
             var vNr_s = vNr_a / 2 + 0.5
@@ -542,45 +477,33 @@ function optionAllValues(optionData, replacedList, dataValues, count, calculator
             var sj_f = 100 * ((sellPrice - modeledProductionCostPerUnit) * 3600) / (vNr_p + ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0))
             var sj_y = PROFIT_BASED_MODELING_WEIGHT
             if (sj_f <= 0) {
-              if (sj_y < 1) {
-                var sj_w = sj_g * (1 + sj_y) / acceleration_multiplier / 1;
-                var Jq_d = sj_w - sj_w * A2Value / 100
-              } else if (sj_y >= 1 && sellPrice > averagePrice) {
+              if (sj_y >= 1 && sellPrice > averagePrice) {
                 break;
               }
 
             } else {
-              var sj_w = (sj_y * sj_f + (1 - sj_y) * sj_g) / acceleration_multiplier / 1;
+              var sj_w = (sj_y * sj_f) / acceleration_multiplier / 1;
               var Jq_d = sj_w - sj_w * A2Value / 100
             }
 
             // Jq函数 Jq(A, ie, be, h, G.averageRetailPrice, n, G.marketSaturation, $, 1)
             var s = (100 * 3600 / Jq_d).toFixed(2)
 
-
-
-
-
-
             // 计算公式y
             var y = (s * sellPrice).toFixed(1);
 
-            // 计算公式N
-            // var n = building_wages * B2Value / 100;
 
-            // 计算p的值 物品成本
-            // var p = market;
 
-            // 计算公式_
+            // // 计算公式_
             var underscore = p * s + building_wages + n;
 
-            // 计算公式w 每级每小时利润
+            // // 计算公式w 每级每小时利润
             var w = y - underscore;
 
-            // 计算每小时销售/单位
+            // // 计算每小时销售/单位
             var salesPerUnitPerHour = (s * C2Value).toFixed(2);
 
-            // 计算每小时利润
+            // // 计算每小时利润
             var profitPerHour = w * C2Value;
 
             // 更新最大值及对应的sellPrice
@@ -653,7 +576,7 @@ function marketAllValues(marketData, replacedList, dataValues, count, calculator
     if (replacedList.includes(db_letter)) {
 
       var quality = marketData[i][1];
-      var market = marketData[i][2] * (1 - mpDiscount/100); // 获取采购和退货
+      var market = marketData[i][2] * (1 - mpDiscount / 100); // 获取采购和退货
 
 
       var maxProfitPerHour = 0;
@@ -666,17 +589,11 @@ function marketAllValues(marketData, replacedList, dataValues, count, calculator
           // 计算公式H
           var averagePrice = dataValues[j][1];
           var marketSaturation = dataValues[j][2];
-          var marketSaturationDiv = dataValues[j][3];
-          var power = dataValues[j][4];
-          var xMultiplier = dataValues[j][5];
-          var xOffsetBase = dataValues[j][6];
-          var yMultiplier = dataValues[j][7];
-          var yOffset = dataValues[j][8];
-          var building_wages = dataValues[j][9]
-          var buildingLevelsNeededPerHour = dataValues[j][10]
-          var modeledProductionCostPerUnit = dataValues[j][11]
-          var modeledStoreWages = dataValues[j][12]
-          var modeledUnitsSoldAnHour = dataValues[j][13]
+          var building_wages = dataValues[j][3]
+          var buildingLevelsNeededPerHour = dataValues[j][4]
+          var modeledProductionCostPerUnit = dataValues[j][5]
+          var modeledStoreWages = dataValues[j][6]
+          var modeledUnitsSoldAnHour = dataValues[j][7]
 
           var p = market;
           var n = building_wages * B2Value / 100;
@@ -715,13 +632,6 @@ function marketAllValues(marketData, replacedList, dataValues, count, calculator
 
             var g_modeledStoreWages, f_modeledStoreWages, y_modeledStoreWages, w_modeledStoreWages
 
-            // sj函数 sj(A, ie, be, 100, h, G.averageRetailPrice, n, G.marketSaturation, $, 1)
-            var sj_h = marketSaturation < 0.3 ? marketSaturation - 0.3 : marketSaturation
-            var sj_p = Math.max(sj_h - quality * 0.24, 0.1 - 0.24 * 2)
-
-            // yNr函数 g = yNr(ie, p, 100, G.averageRetailPrice),
-            var sj_g = (Math.pow(sellPrice * xMultiplier + (xOffsetBase + (sj_p - 0.5) / marketSaturationDiv), power) * yMultiplier + yOffset) * 100
-
             // vNr函数 f = vNr(be, n, G.marketSaturation, 100, G.averageRetailPrice),
             var vNr_a = Math.min(Math.max(2 - marketSaturation, 0), 2)
             var vNr_s = vNr_a / 2 + 0.5
@@ -740,15 +650,12 @@ function marketAllValues(marketData, replacedList, dataValues, count, calculator
             var sj_f = 100 * ((sellPrice - modeledProductionCostPerUnit) * 3600) / (vNr_p + ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0))
             var sj_y = PROFIT_BASED_MODELING_WEIGHT
             if (sj_f <= 0) {
-              if (sj_y < 1) {
-                var sj_w = sj_g * (1 + sj_y) / acceleration_multiplier / 1;
-                var Jq_d = sj_w - sj_w * A2Value / 100
-              } else if (sj_y >= 1 && sellPrice > averagePrice) {
+              if (sj_y >= 1 && sellPrice > averagePrice) {
                 break;
               }
 
             } else {
-              var sj_w = (sj_y * sj_f + (1 - sj_y) * sj_g) / acceleration_multiplier / 1;
+              var sj_w = (sj_y * sj_f) / acceleration_multiplier / 1;
               var Jq_d = sj_w - sj_w * A2Value / 100
             }
 
@@ -758,22 +665,18 @@ function marketAllValues(marketData, replacedList, dataValues, count, calculator
             // 计算公式y
             var y = (s * sellPrice).toFixed(1);
 
-            // 计算公式N
-            // var n = building_wages * B2Value / 100;
 
-            // 计算p的值 物品成本
-            // var p = market;
 
-            // 计算公式_
+            // // 计算公式_
             var underscore = p * s + building_wages + n;
 
-            // 计算公式w 每级每小时利润
+            // // 计算公式w 每级每小时利润
             var w = y - underscore;
 
-            // 计算每小时销售/单位
+            // // 计算每小时销售/单位
             var salesPerUnitPerHour = (s * C2Value).toFixed(2);
 
-            // 计算每小时利润
+            // // 计算每小时利润
             var profitPerHour = w * C2Value;
 
             // 更新最大值及对应的sellPrice

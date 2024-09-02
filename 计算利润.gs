@@ -198,17 +198,11 @@ function calculateOptimalCosts(sheet, realm) { //计算指定时利润下,最大
 
         var averagePrice = dataValues[j][1];
         var marketSaturation = dataValues[j][2];
-        var marketSaturationDiv = dataValues[j][3];
-        var power = dataValues[j][4];
-        var xMultiplier = dataValues[j][5];
-        var xOffsetBase = dataValues[j][6];
-        var yMultiplier = dataValues[j][7];
-        var yOffset = dataValues[j][8];
-        var building_wages = dataValues[j][9]
-        var buildingLevelsNeededPerHour = dataValues[j][10]
-        var modeledProductionCostPerUnit = dataValues[j][11]
-        var modeledStoreWages = dataValues[j][12]
-        var modeledUnitsSoldAnHour = dataValues[j][13]
+        var building_wages = dataValues[j][3]
+        var buildingLevelsNeededPerHour = dataValues[j][4]
+        var modeledProductionCostPerUnit = dataValues[j][5]
+        var modeledStoreWages = dataValues[j][6]
+        var modeledUnitsSoldAnHour = dataValues[j][7]
 
         var n = building_wages * B2Value / 100;
 
@@ -223,6 +217,7 @@ function calculateOptimalCosts(sheet, realm) { //计算指定时利润下,最大
 
 
 
+          // 将起始值和结束值保存为数字，而不是字符串
           // 将起始值和结束值保存为数字，而不是字符串
           if (downlimit < 0) {
             var downlimit1 = 0.1
@@ -251,9 +246,6 @@ function calculateOptimalCosts(sheet, realm) { //计算指定时利润下,最大
 
 
 
-
-
-
           // 初始化 sellPrice 为起始值
           var sellPrice = startSellPrice;
 
@@ -266,13 +258,6 @@ function calculateOptimalCosts(sheet, realm) { //计算指定时利润下,最大
             // 在这里进行你的计算
 
             var g_modeledStoreWages, f_modeledStoreWages, y_modeledStoreWages, w_modeledStoreWages
-
-            // sj函数 sj(A, ie, be, 100, h, G.averageRetailPrice, n, G.marketSaturation, $, 1)
-            var sj_h = marketSaturation < 0.3 ? marketSaturation - 0.3 : marketSaturation
-            var sj_p = Math.max(sj_h - quality * 0.24, 0.1 - 0.24 * 2)
-
-            // yNr函数 g = yNr(ie, p, 100, G.averageRetailPrice),
-            var sj_g = (Math.pow(sellPrice * xMultiplier + (xOffsetBase + (sj_p - 0.5) / marketSaturationDiv), power) * yMultiplier + yOffset) * 100
 
             // vNr函数 f = vNr(be, n, G.marketSaturation, 100, G.averageRetailPrice),
             var vNr_a = Math.min(Math.max(2 - marketSaturation, 0), 2)
@@ -292,15 +277,12 @@ function calculateOptimalCosts(sheet, realm) { //计算指定时利润下,最大
             var sj_f = 100 * ((sellPrice - modeledProductionCostPerUnit) * 3600) / (vNr_p + ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0))
             var sj_y = PROFIT_BASED_MODELING_WEIGHT
             if (sj_f <= 0) {
-              if (sj_y < 1) {
-                var sj_w = sj_g * (1 + sj_y) / acceleration_multiplier / 1;
-                var Jq_d = sj_w - sj_w * A2Value / 100
-              } else if (sj_y >= 1 && sellPrice > averagePrice) {
+              if (sj_y >= 1 && sellPrice > averagePrice) {
                 break;
               }
 
             } else {
-              var sj_w = (sj_y * sj_f + (1 - sj_y) * sj_g) / acceleration_multiplier / 1;
+              var sj_w = (sj_y * sj_f) / acceleration_multiplier / 1;
               var Jq_d = sj_w - sj_w * A2Value / 100
             }
 
@@ -365,7 +347,7 @@ function calculateOptimalCosts(sheet, realm) { //计算指定时利润下,最大
           // 将每小时利润放到计算利润表中
           calculatorSheet.getRange("F" + (count + 9)).setValue(profitPerHour);
 
-          var [optimalSellPrice1, maxSalesPerUnitPerHour1, maxProfitPerHour1] = calculateCostAllValues(maxp, averagePrice, marketSaturation, marketSaturationDiv, power, xMultiplier, xOffsetBase, yMultiplier, yOffset, building_wages, quality, A2Value, B2Value, C2Value, PROFIT_BASED_MODELING_WEIGHT, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, buildingLevelsNeededPerHour, modeledProductionCostPerUnit, modeledStoreWages, modeledUnitsSoldAnHour, upLimit, downlimit);
+          var [optimalSellPrice1, maxSalesPerUnitPerHour1, maxProfitPerHour1] = calculateCostAllValues(maxp, averagePrice, marketSaturation, building_wages, quality, A2Value, B2Value, C2Value, PROFIT_BASED_MODELING_WEIGHT, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, buildingLevelsNeededPerHour, modeledProductionCostPerUnit, modeledStoreWages, modeledUnitsSoldAnHour, upLimit, downlimit);
 
           // 将售价放到计算器表中
           calculatorSheet.getRange("G" + (count + 9)).setValue(optimalSellPrice1);
@@ -420,7 +402,7 @@ function calculateOptimalCosts(sheet, realm) { //计算指定时利润下,最大
   calculatorSheet.getRange(6, 3).setValue(formattedTime);
 }
 
-function calculateCostAllValues(cost, averagePrice, marketSaturation, marketSaturationDiv, power, xMultiplier, xOffsetBase, yMultiplier, yOffset, building_wages, quality, A2Value, B2Value, C2Value, PROFIT_BASED_MODELING_WEIGHT, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, buildingLevelsNeededPerHour, modeledProductionCostPerUnit, modeledStoreWages, modeledUnitsSoldAnHour, upLimit, downlimit) { //根据算出的成本计算最大时利润
+function calculateCostAllValues(cost, averagePrice, marketSaturation, building_wages, quality, A2Value, B2Value, C2Value, PROFIT_BASED_MODELING_WEIGHT, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, buildingLevelsNeededPerHour, modeledProductionCostPerUnit, modeledStoreWages, modeledUnitsSoldAnHour, upLimit, downlimit) { //根据算出的成本计算最大时利润
 
   var maxProfitPerHour = 0;
   var maxSalesPerUnitPerHour = 0;
@@ -464,13 +446,6 @@ function calculateCostAllValues(cost, averagePrice, marketSaturation, marketSatu
 
     var g_modeledStoreWages, f_modeledStoreWages, y_modeledStoreWages, w_modeledStoreWages
 
-    // sj函数 sj(A, ie, be, 100, h, G.averageRetailPrice, n, G.marketSaturation, $, 1)
-    var sj_h = marketSaturation < 0.3 ? marketSaturation - 0.3 : marketSaturation
-    var sj_p = Math.max(sj_h - quality * 0.24, 0.1 - 0.24 * 2)
-
-    // yNr函数 g = yNr(ie, p, 100, G.averageRetailPrice),
-    var sj_g = (Math.pow(sellPrice * xMultiplier + (xOffsetBase + (sj_p - 0.5) / marketSaturationDiv), power) * yMultiplier + yOffset) * 100
-
     // vNr函数 f = vNr(be, n, G.marketSaturation, 100, G.averageRetailPrice),
     var vNr_a = Math.min(Math.max(2 - marketSaturation, 0), 2)
     var vNr_s = vNr_a / 2 + 0.5
@@ -489,15 +464,12 @@ function calculateCostAllValues(cost, averagePrice, marketSaturation, marketSatu
     var sj_f = 100 * ((sellPrice - modeledProductionCostPerUnit) * 3600) / (vNr_p + ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0))
     var sj_y = PROFIT_BASED_MODELING_WEIGHT
     if (sj_f <= 0) {
-      if (sj_y < 1) {
-        var sj_w = sj_g * (1 + sj_y) / acceleration_multiplier / 1;
-        var Jq_d = sj_w - sj_w * A2Value / 100
-      } else if (sj_y >= 1 && sellPrice > averagePrice) {
+      if (sj_y >= 1 && sellPrice > averagePrice) {
         break;
       }
 
     } else {
-      var sj_w = (sj_y * sj_f + (1 - sj_y) * sj_g) / acceleration_multiplier / 1;
+      var sj_w = (sj_y * sj_f) / acceleration_multiplier / 1;
       var Jq_d = sj_w - sj_w * A2Value / 100
     }
 
@@ -507,38 +479,28 @@ function calculateCostAllValues(cost, averagePrice, marketSaturation, marketSatu
     // 计算公式y
     var y = (s * sellPrice).toFixed(1);
 
-    // 计算公式N
-    // var n = building_wages * B2Value / 100;
 
-    // 计算p的值 物品成本
-    // var p = cost;
 
-    // 计算公式_
+    // // 计算公式_
     var underscore = p * s + building_wages + n;
 
-    // 计算公式w 每级每小时利润
+    // // 计算公式w 每级每小时利润
     var w = y - underscore;
 
-    // 计算每小时销售/单位
+    // // 计算每小时销售/单位
     var salesPerUnitPerHour = (s * C2Value).toFixed(2);
 
-    // 计算收入
-    var revenue = y * C2Value;
-
-    // 计算销售成本
-    var salesCost = underscore * C2Value;
-
-    // 计算每小时利润
+    // // 计算每小时利润
     var profitPerHour = w * C2Value;
 
     // 更新最大值及对应的sellPrice
-    if (profitPerHour > maxProfitPerHour) {
+    if (profitPerHour - maxProfitPerHour > 0) {
       maxProfitPerHour = profitPerHour;
       maxSalesPerUnitPerHour = salesPerUnitPerHour;
       optimalSellPrice = sellPrice;
     }
     // 如果最大利润相同，则比较每单位每小时销售额
-    else if (profitPerHour === maxProfitPerHour && salesPerUnitPerHour > maxSalesPerUnitPerHour) {
+    else if (profitPerHour === maxProfitPerHour && salesPerUnitPerHour - maxSalesPerUnitPerHour > 0) {
       maxSalesPerUnitPerHour = salesPerUnitPerHour;
       optimalSellPrice = sellPrice;
     }

@@ -59,29 +59,27 @@ function fetchDataAndInsertToSheet(sessionid, realm, realm_id, customEconomyStat
   // var economyState = 1
 
 
-  //表头
-  var headers1 = ["ID", "averagePrice", "marketSaturation"];
-  var headers2 = ["marketSaturationDiv", "power", "xMultiplier", "xOffsetBase", "yMultiplier", "yOffset"];
-  var headers3 = ["building_wages"];
-  var headers4 = ["buildingLevelsNeededPerHour", "modeledProductionCostPerUnit", "modeledStoreWages", "modeledUnitsSoldAnHour"];
-
   // 如果数据表不存在，创建一个新表
   if (!sheet) {
+    //表头
+    var headers1 = ["ID", "averagePrice", "marketSaturation"];
+    var headers3 = ["building_wages"];
+    var headers4 = ["buildingLevelsNeededPerHour", "modeledProductionCostPerUnit", "modeledStoreWages", "modeledUnitsSoldAnHour"];
+
     sheet = SpreadsheetApp.getActiveSpreadsheet().insertSheet(realm + "数据信息");
     sheet.getRange(1, 1, 1, headers1.length).setValues([headers1]);  // 在第一行写入表头
-    sheet.getRange(1, 4, 1, headers2.length).setValues([headers2]);  // 在第一行写入表头
-    sheet.getRange(1, 10, 1, headers3.length).setValues([headers3]);  // 在第一行写入表头
-    sheet.getRange(1, 11, 1, headers4.length).setValues([headers4]);  // 在第一行写入表头
+    sheet.getRange(1, 4, 1, headers3.length).setValues([headers3]);  // 在第一行写入表头
+    sheet.getRange(1, 5, 1, headers4.length).setValues([headers4]);  // 在第一行写入表头
   }
 
   // 清空表格中原有的数据
-  var clear_range = sheet.getRange("A2:I");
+  var clear_range = sheet.getRange("A2:C");
   clear_range.clearContent();
-  var clear_range2 = sheet.getRange("K2:N");
+  var clear_range2 = sheet.getRange("E2:H");
   clear_range2.clearContent();
 
 
-  // 动态生成rowData1数组
+  // 动态生成rowData1数组 物品id 饱和度 平均价格
   var rowData1 = [];
   var realm_resources_retail_info = "https://www.simcompanies.com/api/v4/" + realm_id + "/resources-retail-info/";
   var realm_resources_retail_info_response = UrlFetchApp.fetch(realm_resources_retail_info);
@@ -95,36 +93,6 @@ function fetchDataAndInsertToSheet(sessionid, realm, realm_id, customEconomyStat
     rowData1.push([ID, averagePrice, saturation]);
   })
 
-  // // 将rowData数组写入到工作表中
-  // sheet.getRange(2, 1, rowData1.length, rowData1[0].length).setValues(rowData1);
-
-  // 动态生成rowData2数组
-  var rowData2 = [];
-  var resources_retail_info = "https://www.simcompanies.com/api/v2/constants/resources-retail-models/";
-  var resources_retail_info_response = UrlFetchApp.fetch(resources_retail_info);
-  var resources_retail_info_data = JSON.parse(resources_retail_info_response.getContentText());
-  if (resources_retail_info_data.hasOwnProperty(realm_id) && resources_retail_info_data[realm_id].hasOwnProperty(economyState)) {
-    var economyData = resources_retail_info_data[realm_id][economyState];
-
-    // 遍历 economyData 下的所有 ID
-    for (var id in economyData) {
-      if (economyData.hasOwnProperty(id)) {
-        var modelData = economyData[id];
-
-        // 提取数据
-        var xMultiplier = modelData.xMultiplier;
-        var yMultiplier = modelData.yMultiplier;
-        var yOffset = modelData.yOffset;
-        var xOffsetBase = modelData.xOffsetBase;
-        var marketSaturationDiv = modelData.marketSaturationDiv;
-        var power = modelData.power;
-
-        // 将提取的数据存储在 rowData2 数组中，以 `id` 为键存储
-        rowData2[id] = [marketSaturationDiv, power, xMultiplier, xOffsetBase, yMultiplier, yOffset];
-      }
-    }
-  }
-
   // 动态生成rowData3数组
   var rowData3 = downloadAndExtractData(realm_id, economyState);
   // Logger.log(rowData3)
@@ -133,12 +101,12 @@ function fetchDataAndInsertToSheet(sessionid, realm, realm_id, customEconomyStat
 
 
   var updatedData1 = [];
-  // 遍历 `rowData1`，并与 `rowData2` 数据匹配
+  // 遍历 `rowData1`，并与 `rowData3` 数据匹配
   rowData1.forEach(function (row) {
     var id = row[0]; // 获取 `rowData1` 中的 `ID`
 
     // 根据 ID 查找 `rowData2` 中的数据
-    var matchingData = rowData2[id];
+    var matchingData = rowData3[id];
 
     // 如果找到匹配的数据，则拼接；否则，将空数据追加
     if (matchingData) {
@@ -148,33 +116,19 @@ function fetchDataAndInsertToSheet(sessionid, realm, realm_id, customEconomyStat
     }
   });
 
-  var updatedData2 = [];
-  // 遍历 `updatedData1`，并与 `rowData3` 数据匹配
-  updatedData1.forEach(function (row) {
-    var id = row[0]; // 获取 `rowData1` 中的 `ID`
 
-    // 根据 ID 查找 `rowData3` 中的数据
-    var matchingData = rowData3[id];
 
-    // 如果找到匹配的数据，则拼接；否则，将空数据追加
-    if (matchingData) {
-      updatedData2.push(row.concat(matchingData));
-    } else {
-      updatedData2.push(row.concat(['', '', '', '']));
-    }
+  // 写入前3列
+  var firstPart = updatedData1.map(function (row) {
+    return row.slice(0, 3); // 取前3列
   });
-
-  // 写入前9列
-  var firstPart = updatedData2.map(function (row) {
-    return row.slice(0, 9); // 取前9列
-  });
-  sheet.getRange(2, 1, firstPart.length, 9).setValues(firstPart);
+  sheet.getRange(2, 1, firstPart.length, 3).setValues(firstPart);
 
   // 写入最后4列
-  var secondPart = updatedData2.map(function (row) {
+  var secondPart = updatedData1.map(function (row) {
     return row.slice(-4); // 取最后4列
   });
-  sheet.getRange(2, 11, secondPart.length, 4).setValues(secondPart);
+  sheet.getRange(2, 5, secondPart.length, 4).setValues(secondPart);
 
 
   if (economyState == 0) {
