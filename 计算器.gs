@@ -34,50 +34,6 @@ function calculateAllValues(sheet, realm) { //计算最大时利润
   range = calculatorSheet.getRange("A9:J");
   range.clearContent();
 
-
-  // 获取库存信息表的数据范围
-  var inventoryRange = inventorySheet.getRange("A2:K" + inventorySheet.getLastRow());
-  var inventoryData = inventoryRange.getValues();
-
-  // 获取数据信息表的数据范围
-  var dataRange = dataSheet.getRange("A2:H" + dataSheet.getLastRow());
-  var dataValues = dataRange.getValues();
-
-  // 获取自定义库存信息
-  var optionRange = calculatorSheet.getRange("N27:P" + calculatorSheet.getLastRow());
-  var optionData = optionRange.getValues();
-
-  // 获取市场价格信息
-  var marketRange = calculatorSheet.getRange("R27:T" + calculatorSheet.getLastRow());
-  var marketData = marketRange.getValues();
-
-  // 获取R1计算器表中的A2,B2,C2单元格的值
-  var A2Value = calculatorSheet.getRange("A2").getValue();
-  var B2Value = calculatorSheet.getRange("B2").getValue();
-  var C2Value = calculatorSheet.getRange("C2").getValue();
-  var PROFIT_BASED_MODELING_WEIGHT = calculatorSheet.getRange("F6").getValue();
-  var PROFIT_PER_BUILDING_LEVEL = calculatorSheet.getRange("H6").getValue();
-  var RETAIL_MODELING_QUALITY_WEIGHT = calculatorSheet.getRange("J6").getValue();
-  var acceleration_multiplier = calculatorSheet.getRange("F3").getValue();
-  var upLimit = calculatorSheet.getRange("L1").getValue();
-  var downlimit = calculatorSheet.getRange("L2").getValue();
-  var mpDiscount = calculatorSheet.getRange("U26").getValue();
-
-
-  // 获取选中的物品ID
-  var select_range = calculatorSheet.getRange("O1:V14");
-  var values = select_range.getValues();
-  var output = [];
-  for (var row = 1; row < values.length; row++) { // 从第二行开始
-    for (var col = 0; col < values[row].length; col++) { // 从第1列开始
-      if (values[row][col] === true) { // 如果单元格的值为TRUE
-        // 获取上一个单元格的内容并添加到输出数组中
-        var previousCellContent = values[row - 1][col];
-        output.push(previousCellContent);
-      }
-    }
-  }
-  // Logger.log(output)
   const mapping = {
     '苹果': 3,
     '橘子': 4,
@@ -125,6 +81,60 @@ function calculateAllValues(sheet, realm) { //计算最大时利润
     '巧克力': 140,
     'Xmas ornament': 144
   };
+
+
+  // 获取库存信息表的数据范围
+  var inventoryRange = inventorySheet.getRange("A2:K" + inventorySheet.getLastRow());
+  var inventoryData = inventoryRange.getValues();
+
+  // 获取数据信息表的数据范围
+  var dataRange = dataSheet.getRange("A2:H" + dataSheet.getLastRow());
+  var dataValues = dataRange.getValues();
+
+  // 获取自定义库存信息
+  var optionRange = calculatorSheet.getRange("N27:P" + calculatorSheet.getLastRow());
+  var optionData = optionRange.getValues();
+
+  // 将自定义库存信息物品名称转换为对应的物品ID，如果已经是ID则保持不变
+  optionData = optionData.map(row => {
+    if (isNaN(row[0])) {
+      row[0] = mapping[row[0]] || row[0];
+    }
+    return row;
+  });
+
+  // 获取市场价格信息
+  var marketRange = calculatorSheet.getRange("R27:T" + calculatorSheet.getLastRow());
+  var marketData = marketRange.getValues();
+
+  // 获取R1计算器表中的A2,B2,C2单元格的值
+  var A2Value = calculatorSheet.getRange("A2").getValue();
+  var B2Value = calculatorSheet.getRange("B2").getValue();
+  var C2Value = calculatorSheet.getRange("C2").getValue();
+
+  var PROFIT_PER_BUILDING_LEVEL = calculatorSheet.getRange("H6").getValue();
+  var RETAIL_MODELING_QUALITY_WEIGHT = calculatorSheet.getRange("J6").getValue();
+  var acceleration_multiplier = calculatorSheet.getRange("F3").getValue();
+  var upLimit = calculatorSheet.getRange("L1").getValue();
+  var downlimit = calculatorSheet.getRange("L2").getValue();
+  var mpDiscount = calculatorSheet.getRange("U26").getValue();
+
+
+  // 获取选中的物品ID
+  var select_range = calculatorSheet.getRange("O1:V14");
+  var values = select_range.getValues();
+  var output = [];
+  for (var row = 1; row < values.length; row++) { // 从第二行开始
+    for (var col = 0; col < values[row].length; col++) { // 从第1列开始
+      if (values[row][col] === true) { // 如果单元格的值为TRUE
+        // 获取上一个单元格的内容并添加到输出数组中
+        var previousCellContent = values[row - 1][col];
+        output.push(previousCellContent);
+      }
+    }
+  }
+  // Logger.log(output)
+
   const replacedList = output.map(item => mapping[item]);
 
   const reverseMapping = Object.entries(mapping).reduce((acc, [key, value]) => {
@@ -223,14 +233,11 @@ function calculateAllValues(sheet, realm) { //计算最大时利润
 
             // wNr函数 wNr(p, be.modeledProductionCostPerUnit, (w = be.modeledStoreWages) != null ? w : 0, G.averageRetailPrice, 100)
             var sj_f = 100 * ((sellPrice - modeledProductionCostPerUnit) * 3600) / (vNr_p + ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0))
-            var sj_y = PROFIT_BASED_MODELING_WEIGHT
-            if (sj_f <= 0) {
-              if (sj_y >= 1 && sellPrice > averagePrice) {
-                break;
-              }
 
+            if (sj_f <= 0 && sellPrice > averagePrice) {
+              break;
             } else {
-              var sj_w = (sj_y * sj_f) / acceleration_multiplier / 1;
+              var sj_w = sj_f / acceleration_multiplier / 1;
               var Jq_d = sj_w - sj_w * A2Value / 100
             }
 
@@ -338,12 +345,12 @@ function calculateAllValues(sheet, realm) { //计算最大时利润
 
   var optionButton = calculatorSheet.getRange("E5").getValue();
   if (optionButton) {
-    count = optionAllValues(optionData, replacedList, dataValues, count, calculatorSheet, A2Value, B2Value, C2Value, getChineseItem, PROFIT_BASED_MODELING_WEIGHT, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, upLimit, downlimit);
+    count = optionAllValues(optionData, replacedList, dataValues, count, calculatorSheet, A2Value, B2Value, C2Value, getChineseItem, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, upLimit, downlimit);
   }
 
   var marketButton = calculatorSheet.getRange("F5").getValue();
   if (marketButton) {
-    marketAllValues(marketData, replacedList, dataValues, count, calculatorSheet, A2Value, B2Value, C2Value, getChineseItem, PROFIT_BASED_MODELING_WEIGHT, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, upLimit, downlimit, mpDiscount);
+    marketAllValues(marketData, replacedList, dataValues, count, calculatorSheet, A2Value, B2Value, C2Value, getChineseItem, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, upLimit, downlimit, mpDiscount);
   }
 
 
@@ -392,7 +399,7 @@ function convertToTime(amount, maxSalesPerUnitPerHour) { // 返回销售时间(�
 }
 
 
-function optionAllValues(optionData, replacedList, dataValues, count, calculatorSheet, A2Value, B2Value, C2Value, getChineseItem, PROFIT_BASED_MODELING_WEIGHT, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, upLimit, downlimit) {
+function optionAllValues(optionData, replacedList, dataValues, count, calculatorSheet, A2Value, B2Value, C2Value, getChineseItem, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, upLimit, downlimit) {
 
   count++;
 
@@ -475,14 +482,10 @@ function optionAllValues(optionData, replacedList, dataValues, count, calculator
 
             // wNr函数 wNr(p, be.modeledProductionCostPerUnit, (w = be.modeledStoreWages) != null ? w : 0, G.averageRetailPrice, 100)
             var sj_f = 100 * ((sellPrice - modeledProductionCostPerUnit) * 3600) / (vNr_p + ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0))
-            var sj_y = PROFIT_BASED_MODELING_WEIGHT
-            if (sj_f <= 0) {
-              if (sj_y >= 1 && sellPrice > averagePrice) {
-                break;
-              }
-
+            if (sj_f <= 0 && sellPrice > averagePrice) {
+              break;
             } else {
-              var sj_w = (sj_y * sj_f) / acceleration_multiplier / 1;
+              var sj_w = sj_f / acceleration_multiplier / 1;
               var Jq_d = sj_w - sj_w * A2Value / 100
             }
 
@@ -565,7 +568,7 @@ function optionAllValues(optionData, replacedList, dataValues, count, calculator
 }
 
 
-function marketAllValues(marketData, replacedList, dataValues, count, calculatorSheet, A2Value, B2Value, C2Value, getChineseItem, PROFIT_BASED_MODELING_WEIGHT, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, upLimit, downlimit, mpDiscount) {
+function marketAllValues(marketData, replacedList, dataValues, count, calculatorSheet, A2Value, B2Value, C2Value, getChineseItem, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, upLimit, downlimit, mpDiscount) {
 
   count++;
 
@@ -648,14 +651,10 @@ function marketAllValues(marketData, replacedList, dataValues, count, calculator
 
             // wNr函数 wNr(p, be.modeledProductionCostPerUnit, (w = be.modeledStoreWages) != null ? w : 0, G.averageRetailPrice, 100)
             var sj_f = 100 * ((sellPrice - modeledProductionCostPerUnit) * 3600) / (vNr_p + ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0))
-            var sj_y = PROFIT_BASED_MODELING_WEIGHT
-            if (sj_f <= 0) {
-              if (sj_y >= 1 && sellPrice > averagePrice) {
-                break;
-              }
-
+            if (sj_f <= 0 && sellPrice > averagePrice) {
+              break;
             } else {
-              var sj_w = (sj_y * sj_f) / acceleration_multiplier / 1;
+              var sj_w = sj_f / acceleration_multiplier / 1;
               var Jq_d = sj_w - sj_w * A2Value / 100
             }
 

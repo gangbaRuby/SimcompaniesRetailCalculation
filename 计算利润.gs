@@ -50,7 +50,7 @@ function calculateOptimalCosts(sheet, realm) { //计算指定时利润下,最大
   var B2Value = calculatorSheet.getRange("B2").getValue();
   var C2Value = calculatorSheet.getRange("C2").getValue();
   var I1Value = calculatorSheet.getRange("I1").getValue();//固定利润
-  var PROFIT_BASED_MODELING_WEIGHT = calculatorSheet.getRange("F6").getValue();
+
   var PROFIT_PER_BUILDING_LEVEL = calculatorSheet.getRange("H6").getValue();
   var RETAIL_MODELING_QUALITY_WEIGHT = calculatorSheet.getRange("J6").getValue();
   var acceleration_multiplier = calculatorSheet.getRange("F3").getValue();
@@ -275,14 +275,11 @@ function calculateOptimalCosts(sheet, realm) { //计算指定时利润下,最大
 
             // wNr函数 wNr(p, be.modeledProductionCostPerUnit, (w = be.modeledStoreWages) != null ? w : 0, G.averageRetailPrice, 100)
             var sj_f = 100 * ((sellPrice - modeledProductionCostPerUnit) * 3600) / (vNr_p + ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0))
-            var sj_y = PROFIT_BASED_MODELING_WEIGHT
-            if (sj_f <= 0) {
-              if (sj_y >= 1 && sellPrice > averagePrice) {
-                break;
-              }
 
+            if (sj_f <= 0 && sellPrice > averagePrice) {
+                break;
             } else {
-              var sj_w = (sj_y * sj_f) / acceleration_multiplier / 1;
+              var sj_w = sj_f / acceleration_multiplier / 1;
               var Jq_d = sj_w - sj_w * A2Value / 100
             }
 
@@ -347,7 +344,7 @@ function calculateOptimalCosts(sheet, realm) { //计算指定时利润下,最大
           // 将每小时利润放到计算利润表中
           calculatorSheet.getRange("F" + (count + 9)).setValue(profitPerHour);
 
-          var [optimalSellPrice1, maxSalesPerUnitPerHour1, maxProfitPerHour1] = calculateCostAllValues(maxp, averagePrice, marketSaturation, building_wages, quality, A2Value, B2Value, C2Value, PROFIT_BASED_MODELING_WEIGHT, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, buildingLevelsNeededPerHour, modeledProductionCostPerUnit, modeledStoreWages, modeledUnitsSoldAnHour, upLimit, downlimit);
+          var [optimalSellPrice1, maxSalesPerUnitPerHour1, maxProfitPerHour1] = calculateCostAllValues(maxp, averagePrice, marketSaturation, building_wages, quality, A2Value, B2Value, C2Value, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, buildingLevelsNeededPerHour, modeledProductionCostPerUnit, modeledStoreWages, modeledUnitsSoldAnHour, upLimit, downlimit);
 
           // 将售价放到计算器表中
           calculatorSheet.getRange("G" + (count + 9)).setValue(optimalSellPrice1);
@@ -402,7 +399,7 @@ function calculateOptimalCosts(sheet, realm) { //计算指定时利润下,最大
   calculatorSheet.getRange(6, 3).setValue(formattedTime);
 }
 
-function calculateCostAllValues(cost, averagePrice, marketSaturation, building_wages, quality, A2Value, B2Value, C2Value, PROFIT_BASED_MODELING_WEIGHT, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, buildingLevelsNeededPerHour, modeledProductionCostPerUnit, modeledStoreWages, modeledUnitsSoldAnHour, upLimit, downlimit) { //根据算出的成本计算最大时利润
+function calculateCostAllValues(cost, averagePrice, marketSaturation, building_wages, quality, A2Value, B2Value, C2Value, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, buildingLevelsNeededPerHour, modeledProductionCostPerUnit, modeledStoreWages, modeledUnitsSoldAnHour, upLimit, downlimit) { //根据算出的成本计算最大时利润
 
   var maxProfitPerHour = 0;
   var maxSalesPerUnitPerHour = 0;
@@ -462,14 +459,10 @@ function calculateCostAllValues(cost, averagePrice, marketSaturation, building_w
 
     // wNr函数 wNr(p, be.modeledProductionCostPerUnit, (w = be.modeledStoreWages) != null ? w : 0, G.averageRetailPrice, 100)
     var sj_f = 100 * ((sellPrice - modeledProductionCostPerUnit) * 3600) / (vNr_p + ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0))
-    var sj_y = PROFIT_BASED_MODELING_WEIGHT
-    if (sj_f <= 0) {
-      if (sj_y >= 1 && sellPrice > averagePrice) {
+    if (sj_f <= 0 && sellPrice > averagePrice) {
         break;
-      }
-
     } else {
-      var sj_w = (sj_y * sj_f) / acceleration_multiplier / 1;
+      var sj_w = sj_f / acceleration_multiplier / 1;
       var Jq_d = sj_w - sj_w * A2Value / 100
     }
 

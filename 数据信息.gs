@@ -94,7 +94,7 @@ function fetchDataAndInsertToSheet(sessionid, realm, realm_id, customEconomyStat
   })
 
   // 动态生成rowData3数组
-  var rowData3 = downloadAndExtractData(realm_id, economyState);
+  var rowData3 = downloadAndExtractData(realm_id, economyState, calculatorSheet, profitSheet, speedSheet, optionSellPriceSheet, profitSheetSpeed);
   // Logger.log(rowData3)
 
 
@@ -162,30 +162,13 @@ function fetchDataAndInsertToSheet(sessionid, realm, realm_id, customEconomyStat
 
 
 
-  var core = constants_core();
 
 
-  calculatorSheet.getRange(6, 8).setValue(core[0]);
-  profitSheet.getRange(6, 8).setValue(core[0]);
-  speedSheet.getRange(6, 8).setValue(core[0]);
-  optionSellPriceSheet.getRange(6, 8).setValue(core[0]);
 
-  calculatorSheet.getRange(6, 10).setValue(core[1]);
-  profitSheet.getRange(6, 10).setValue(core[1]);
-  speedSheet.getRange(6, 10).setValue(core[1]);
-  optionSellPriceSheet.getRange(6, 10).setValue(core[1]);
 
-  if (realm_id == 0) {
-    calculatorSheet.getRange(6, 6).setValue(core[2]);
-    profitSheet.getRange(6, 6).setValue(core[2]);
-    speedSheet.getRange(6, 6).setValue(core[2]);
-    optionSellPriceSheet.getRange(6, 6).setValue(core[2]);
-  } else if (realm_id == 1) {
-    calculatorSheet.getRange(6, 6).setValue(core[3]);
-    profitSheet.getRange(6, 6).setValue(core[3]);
-    speedSheet.getRange(6, 6).setValue(core[3]);
-    optionSellPriceSheet.getRange(6, 6).setValue(core[3]);
-  }
+
+
+
 
 
 
@@ -259,10 +242,13 @@ function get_economyState(sessionid) {
 }
 
 
-function downloadAndExtractData(realm_id, economyState) {
+function downloadAndExtractData(realm_id, economyState, calculatorSheet, profitSheet, speedSheet, optionSellPriceSheet, profitSheetSpeed) {
   var url = fetchScriptUrl();
   var response = UrlFetchApp.fetch(url);
   var content = response.getContentText();
+
+  var values = extractValuesFromJS(content);
+
 
   // 使用正则表达式提取所需内容
   var jsonDataString = extractJsonString(content);
@@ -277,6 +263,21 @@ function downloadAndExtractData(realm_id, economyState) {
       // 导出数据 Google Sheet
       var extractedData = extractData(jsonData, realm_id, economyState);
 
+      extractedData.PROFIT_PER_BUILDING_LEVEL = values.PROFIT_PER_BUILDING_LEVEL;
+      extractedData.RETAIL_MODELING_QUALITY_WEIGHT = values.RETAIL_MODELING_QUALITY_WEIGHT;
+
+      calculatorSheet.getRange(6, 8).setValue(extractedData.PROFIT_PER_BUILDING_LEVEL);
+      profitSheet.getRange(6, 8).setValue(extractedData.PROFIT_PER_BUILDING_LEVEL);
+      speedSheet.getRange(6, 8).setValue(extractedData.PROFIT_PER_BUILDING_LEVEL);
+      optionSellPriceSheet.getRange(6, 8).setValue(extractedData.PROFIT_PER_BUILDING_LEVEL);
+      profitSheetSpeed.getRange(6, 8).setValue(extractedData.PROFIT_PER_BUILDING_LEVEL);
+
+      calculatorSheet.getRange(6, 10).setValue(extractedData.RETAIL_MODELING_QUALITY_WEIGHT);
+      profitSheet.getRange(6, 10).setValue(extractedData.RETAIL_MODELING_QUALITY_WEIGHT);
+      speedSheet.getRange(6, 10).setValue(extractedData.RETAIL_MODELING_QUALITY_WEIGHT);
+      optionSellPriceSheet.getRange(6, 10).setValue(extractedData.RETAIL_MODELING_QUALITY_WEIGHT);
+      profitSheetSpeed.getRange(6, 10).setValue(extractedData.RETAIL_MODELING_QUALITY_WEIGHT);
+
       return extractedData;
 
     } catch (e) {
@@ -285,6 +286,9 @@ function downloadAndExtractData(realm_id, economyState) {
   } else {
     Logger.log("无法找到有效的 JSON 数据。");
   }
+
+
+
 }
 
 function extractJsonString(content) {
@@ -349,28 +353,33 @@ function fetchScriptUrl() {
 }
 
 
-function constants_core() {
+function extractValuesFromJS(jsContent) {
+  // 提取变量名
+  var profitVarName = extractVariableName(jsContent, 'PROFIT_PER_BUILDING_LEVEL');
+  var retailVarName = extractVariableName(jsContent, 'RETAIL_MODELING_QUALITY_WEIGHT');
 
-  var coreData = [];
+  // 获取变量值
+  var profitValue = extractVariableValue(jsContent, profitVarName);
+  var retailValue = extractVariableValue(jsContent, retailVarName);
 
-  var constants_core = "https://www.simcompanies.com/api/v2/constants/core/";
-  var constants_core_response = UrlFetchApp.fetch(constants_core);
-  var constants_core_data = JSON.parse(constants_core_response.getContentText());
+  return {
+    PROFIT_PER_BUILDING_LEVEL: profitValue,
+    RETAIL_MODELING_QUALITY_WEIGHT: retailValue
+  };
+}
 
-  //Logger.log(constants_core_data)
+function extractVariableName(jsContent, key) {
+  // 使用正则表达式查找以 key 为值的变量赋值语句
+  var regex = new RegExp(key + '\\s*:\\s*(\\w+),');
+  var match = jsContent.match(regex);
+  return match ? match[1] : null;
+}
 
+function extractVariableValue(jsContent, variableName) {
+  if (!variableName) return null;
 
-  var PROFIT_PER_BUILDING_LEVEL = constants_core_data.PROFIT_PER_BUILDING_LEVEL;
-  var RETAIL_MODELING_QUALITY_WEIGHT = constants_core_data.RETAIL_MODELING_QUALITY_WEIGHT;
-  var PROFIT_BASED_MODELING_WEIGHT_MAGNATES = constants_core_data.PROFIT_BASED_MODELING_WEIGHT_MAGNATES;
-  var PROFIT_BASED_MODELING_WEIGHT_ENTREPRENEURS = constants_core_data.PROFIT_BASED_MODELING_WEIGHT_ENTREPRENEURS;
-
-
-  coreData.push(PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, PROFIT_BASED_MODELING_WEIGHT_MAGNATES, PROFIT_BASED_MODELING_WEIGHT_ENTREPRENEURS);
-
-  //Logger.log(coreData)
-
-  return coreData;
-
-
+  // 使用正则表达式查找变量赋值
+  var regex = new RegExp(variableName + '\\s*=\\s*([^,]+),');
+  var match = jsContent.match(regex);
+  return match ? match[1] : null;
 }
