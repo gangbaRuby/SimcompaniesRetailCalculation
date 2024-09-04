@@ -94,7 +94,7 @@ function fetchDataAndInsertToSheet(sessionid, realm, realm_id, customEconomyStat
   })
 
   // 动态生成rowData3数组
-  var rowData3 = downloadAndExtractData(realm_id, economyState, calculatorSheet, profitSheet, speedSheet, optionSellPriceSheet, profitSheetSpeed);
+  var rowData3 = downloadAndExtractData(realm_id, economyState, calculatorSheet, profitSheet, speedSheet, optionSellPriceSheet);
   // Logger.log(rowData3)
 
 
@@ -242,7 +242,7 @@ function get_economyState(sessionid) {
 }
 
 
-function downloadAndExtractData(realm_id, economyState, calculatorSheet, profitSheet, speedSheet, optionSellPriceSheet, profitSheetSpeed) {
+function downloadAndExtractData(realm_id, economyState, calculatorSheet, profitSheet, speedSheet, optionSellPriceSheet) {
   var url = fetchScriptUrl();
   var response = UrlFetchApp.fetch(url);
   var content = response.getContentText();
@@ -270,13 +270,13 @@ function downloadAndExtractData(realm_id, economyState, calculatorSheet, profitS
       profitSheet.getRange(6, 8).setValue(extractedData.PROFIT_PER_BUILDING_LEVEL);
       speedSheet.getRange(6, 8).setValue(extractedData.PROFIT_PER_BUILDING_LEVEL);
       optionSellPriceSheet.getRange(6, 8).setValue(extractedData.PROFIT_PER_BUILDING_LEVEL);
-      profitSheetSpeed.getRange(6, 8).setValue(extractedData.PROFIT_PER_BUILDING_LEVEL);
+      
 
       calculatorSheet.getRange(6, 10).setValue(extractedData.RETAIL_MODELING_QUALITY_WEIGHT);
       profitSheet.getRange(6, 10).setValue(extractedData.RETAIL_MODELING_QUALITY_WEIGHT);
       speedSheet.getRange(6, 10).setValue(extractedData.RETAIL_MODELING_QUALITY_WEIGHT);
       optionSellPriceSheet.getRange(6, 10).setValue(extractedData.RETAIL_MODELING_QUALITY_WEIGHT);
-      profitSheetSpeed.getRange(6, 10).setValue(extractedData.RETAIL_MODELING_QUALITY_WEIGHT);
+      
 
       return extractedData;
 
