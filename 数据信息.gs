@@ -94,7 +94,7 @@ function fetchDataAndInsertToSheet(sessionid, realm, realm_id, customEconomyStat
   })
 
   // 动态生成rowData3数组
-  var rowData3 = downloadAndExtractData(realm_id, economyState, calculatorSheet, profitSheet, speedSheet, optionSellPriceSheet, profitSheetSpeed);
+  var rowData3 = downloadAndExtractData(realm_id, economyState, calculatorSheet, profitSheet, speedSheet, optionSellPriceSheet);
   // Logger.log(rowData3)
 
 
@@ -242,7 +242,7 @@ function get_economyState(sessionid) {
 }
 
 
-function downloadAndExtractData(realm_id, economyState, calculatorSheet, profitSheet, speedSheet, optionSellPriceSheet, profitSheetSpeed) {
+function downloadAndExtractData(realm_id, economyState, calculatorSheet, profitSheet, speedSheet, optionSellPriceSheet) {
   var url = fetchScriptUrl();
   var response = UrlFetchApp.fetch(url);
   var content = response.getContentText();
