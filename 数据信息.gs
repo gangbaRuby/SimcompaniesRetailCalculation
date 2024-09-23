@@ -93,6 +93,13 @@ function fetchDataAndInsertToSheet(sessionid, realm, realm_id, customEconomyStat
     rowData1.push([ID, averagePrice, saturation]);
   })
 
+  var idsToCheck = [146, 147, 148];
+  idsToCheck.forEach(function (id) {
+    if (!rowData1.some(function (row) { return row[0] === id; })) {
+      rowData1.push([id, '', '']); // 添加缺失的 ID，后面为空数据
+    }
+  });
+
   // 动态生成rowData3数组
   var rowData3 = downloadAndExtractData(realm_id, economyState, calculatorSheet, profitSheet, speedSheet, optionSellPriceSheet);
   // Logger.log(rowData3)
@@ -270,13 +277,13 @@ function downloadAndExtractData(realm_id, economyState, calculatorSheet, profitS
       profitSheet.getRange(6, 8).setValue(extractedData.PROFIT_PER_BUILDING_LEVEL);
       speedSheet.getRange(6, 8).setValue(extractedData.PROFIT_PER_BUILDING_LEVEL);
       optionSellPriceSheet.getRange(6, 8).setValue(extractedData.PROFIT_PER_BUILDING_LEVEL);
-      
+
 
       calculatorSheet.getRange(6, 10).setValue(extractedData.RETAIL_MODELING_QUALITY_WEIGHT);
       profitSheet.getRange(6, 10).setValue(extractedData.RETAIL_MODELING_QUALITY_WEIGHT);
       speedSheet.getRange(6, 10).setValue(extractedData.RETAIL_MODELING_QUALITY_WEIGHT);
       optionSellPriceSheet.getRange(6, 10).setValue(extractedData.RETAIL_MODELING_QUALITY_WEIGHT);
-      
+
 
       return extractedData;
 

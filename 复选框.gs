@@ -34,6 +34,10 @@ function onCheckboxClick(e) {
         sheet.getRange('O18:T18'),
         sheet.getRange('N20:T20')
       ];
+    } else if (checkbox.getA1Notation() === 'R4') { // Q
+      checkboxesToSync = [
+        sheet.getRange('S4:U4')
+      ];
     }
 
     // 将其他复选框的值设置为与当前复选框相同
