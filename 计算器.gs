@@ -6,7 +6,9 @@ function onEdit3(e) {
   if (sheet.getName() == "R1计算器" && range.getRow() == 5 && range.getColumn() == 3 && range.getValue() == true) {
     // 调用 calculateAllValues 函数 参数R1计算器
     var R1 = 'R1';
-    calculateAllValues('R1计算器', R1);
+    var sessionid_settings = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("使用说明");
+    var sessionid = sessionid_settings.getRange("B1").getValue();
+    calculateAllValues('R1计算器', R1, sessionid_settings, sessionid);
 
     // 将复选框的值重置为 FALSE，以便下次触发
     range.setValue(false);
@@ -16,15 +18,25 @@ function onEdit3(e) {
   if (sheet.getName() == "R2计算器" && range.getRow() == 5 && range.getColumn() == 3 && range.getValue() == true) {
     // 调用 calculateAllValues 函数 参数R2计算器
     var R2 = 'R2';
-    calculateAllValues('R2计算器', R2);
+    var sessionid_settings = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("使用说明");
+    var sessionid = sessionid_settings.getRange("B2").getValue();
+    calculateAllValues('R2计算器', R2, sessionid_settings, sessionid);
 
     // 将复选框的值重置为 FALSE，以便下次触发
     range.setValue(false);
   }
 }
 
-function calculateAllValues(sheet, realm) { //计算最大时利润
+function calculateAllValues(sheet, realm, sessionid_settings, sessionid) { //计算最大时利润
 
+  if (sessionid != null) {
+    if (realm == 'R1') {
+      sessionid_settings.getRange(1, 7).setValue(getAdministration_overhead(sessionid))
+    }
+    else if (realm == 'R2') {
+      sessionid_settings.getRange(2, 7).setValue(getAdministration_overhead(sessionid))
+    }
+  }
 
   var inventorySheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(realm + "库存信息");
   var dataSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(realm + "数据信息");
@@ -106,9 +118,7 @@ function calculateAllValues(sheet, realm) { //计算最大时利润
     return row;
   });
 
-  // 获取市场价格信息
-  var marketRange = calculatorSheet.getRange("R27:T" + calculatorSheet.getLastRow());
-  var marketData = marketRange.getValues();
+
 
   // 获取R1计算器表中的A2,B2,C2单元格的值
   var A2Value = calculatorSheet.getRange("A2").getValue();
@@ -353,6 +363,11 @@ function calculateAllValues(sheet, realm) { //计算最大时利润
 
   var marketButton = calculatorSheet.getRange("F5").getValue();
   if (marketButton) {
+    if (realm == 'R1') {
+      get_price(sheet, 0);
+    } else if (realm == 'R2') {
+      get_price(sheet, 1);
+    }
     marketAllValues(marketData, replacedList, dataValues, count, calculatorSheet, A2Value, B2Value, C2Value, getChineseItem, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, upLimit, downlimit, mpDiscount);
   }
 

@@ -6,8 +6,9 @@ function onEdit5(e) {
   if (sheet.getName() == "R1固定利润算成本" && range.getRow() == 5 && range.getColumn() == 3 && range.getValue() == true) {
 
     var R1 = 'R1';
-
-    calculateOptimalCosts('R1固定利润算成本', R1);
+    var sessionid_settings = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("使用说明");
+    var sessionid = sessionid_settings.getRange("B1").getValue();
+    calculateOptimalCosts('R1固定利润算成本', R1, sessionid_settings, sessionid);
 
 
 
@@ -19,8 +20,9 @@ function onEdit5(e) {
   if (sheet.getName() == "R2固定利润算成本" && range.getRow() == 5 && range.getColumn() == 3 && range.getValue() == true) {
 
     var R2 = 'R2';
-
-    calculateOptimalCosts('R2固定利润算成本', R2);
+    var sessionid_settings = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("使用说明");
+    var sessionid = sessionid_settings.getRange("B2").getValue();
+    calculateOptimalCosts('R2固定利润算成本', R2, sessionid_settings, sessionid);
 
 
 
@@ -29,7 +31,16 @@ function onEdit5(e) {
   }
 }
 
-function calculateOptimalCosts(sheet, realm) { //计算指定时利润下,最大每小时销售/单位，最大成本
+function calculateOptimalCosts(sheet, realm, sessionid_settings, sessionid) { //计算指定时利润下,最大每小时销售/单位，最大成本
+
+  if (sessionid != null) {
+    if (realm == 'R1') {
+      sessionid_settings.getRange(1, 7).setValue(getAdministration_overhead(sessionid))
+    }
+    else if (realm == 'R2') {
+      sessionid_settings.getRange(2, 7).setValue(getAdministration_overhead(sessionid))
+    }
+  }
 
   // sheet = 'R1固定利润算成本'
   // realm = 'R1'
@@ -280,7 +291,7 @@ function calculateOptimalCosts(sheet, realm) { //计算指定时利润下,最大
             var sj_f = 100 * ((sellPrice - modeledProductionCostPerUnit) * 3600) / (vNr_p + ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0))
 
             if (sj_f <= 0 && sellPrice > averagePrice) {
-                break;
+              break;
             } else {
               var sj_w = sj_f / acceleration_multiplier / 1;
               var Jq_d = sj_w - sj_w * A2Value / 100
@@ -463,7 +474,7 @@ function calculateCostAllValues(cost, averagePrice, marketSaturation, building_w
     // wNr函数 wNr(p, be.modeledProductionCostPerUnit, (w = be.modeledStoreWages) != null ? w : 0, G.averageRetailPrice, 100)
     var sj_f = 100 * ((sellPrice - modeledProductionCostPerUnit) * 3600) / (vNr_p + ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0))
     if (sj_f <= 0 && sellPrice > averagePrice) {
-        break;
+      break;
     } else {
       var sj_w = sj_f / acceleration_multiplier / 1;
       var Jq_d = sj_w - sj_w * A2Value / 100
