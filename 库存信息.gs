@@ -29,7 +29,8 @@ function onEdit2(e) {
 
 
 function fetchDataWithCookies(sessionid, realm) {// 获取库存
-  var url = "https://www.simcompanies.com/api/v2/resources/";
+  var me_url = "https://www.simcompanies.com/api/v2/companies/me/";
+  
 
   // 设置 cookies
   var cookies = {
@@ -46,16 +47,24 @@ function fetchDataWithCookies(sessionid, realm) {// 获取库存
     }
   };
 
+  // 发起请求 me 提取uid
+  var me_response = UrlFetchApp.fetch(me_url, options);
+  var me_data = JSON.parse(me_response.getContentText());
+  var uid = me_data.authCompany.companyId.toFixed(0);
+
+  // Logger.log(uid)
+
   // 发起请求
+  var url = "https://www.simcompanies.com/api/v3/resources/" + uid + "/";
   var response = UrlFetchApp.fetch(url, options);
   var data = JSON.parse(response.getContentText());
 
   // 提取符合条件的数据，并按照要求输出
   var filteredData = data.filter(function (item) {
-    return item.kind && typeof item.kind.db_letter !== 'undefined';
+    return item.kind;
   }).map(function (item) {
     return {
-      "db_letter": item.kind.db_letter,
+      "db_letter": item.kind,
       "quality": item.quality,
       "amount": item.amount,
       "workers": item.cost.workers,
