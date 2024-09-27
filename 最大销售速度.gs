@@ -92,9 +92,9 @@ function calculateSaleSpeed(sheet, realm, sessionid_settings, sessionid) { //计
     '面条': 128,
     '巧克力': 140,
     'Xmas ornament': 144,
-    'pumpkin': 146,
-    'jack-o-lantern': 147,
-    'witch-costume': 148
+    '南瓜': 146,
+    '杰克灯笼': 147,
+    '女巫服': 148
   };
 
 

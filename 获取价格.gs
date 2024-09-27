@@ -89,9 +89,9 @@ function get_price(sheet, realm) {
     '面条': 128,
     '巧克力': 140,
     'Xmas ornament': 144,
-    'pumpkin': 146,
-    'jack-o-lantern': 147,
-    'witch-costume': 148
+    '南瓜': 146,
+    '杰克灯笼': 147,
+    '女巫服': 148
   };
   const replacedList = output.map(item => mapping[item]);
 
