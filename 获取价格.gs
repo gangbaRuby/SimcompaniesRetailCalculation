@@ -35,7 +35,7 @@ function get_price(sheet, realm) {
   var output = [];
   for (var row = 1; row < values.length; row++) { // 从第二行开始
     for (var col = 0; col < values[row].length; col++) { // 从第1列开始
-      if (values[row][col] === true && !(row === 3 && col === 4)) { // 如果单元格的值为TRUE
+      if (values[row][col] === true && !(row === 3 && col === 3)) { // 如果单元格的值为TRUE
         // 获取上一个单元格的内容并添加到输出数组中
         var previousCellContent = values[row - 1][col];
         output.push(previousCellContent);
