@@ -196,7 +196,7 @@ function calculateSaleSpeed(sheet, realm, sessionid_settings, sessionid) { //计
           var p = ((workers + admin + material1 + material2 + material3 + material4 + material5 + market) / amount).toFixed(3);
           var n = building_wages * B2Value / 100;
 
-          if (downlimit = -1) { // -1 成本价
+          if (downlimit === -1) { // -1 成本价
             if (p - 8 < 0) {
               var startSellPrice = parseFloat((Math.floor(p / 0.01) * 0.01).toFixed(2));
               var endSellPrice = parseFloat((p * upLimit).toFixed(2));
@@ -453,7 +453,7 @@ function optionSpeed(optionData, replacedList, dataValues, count, calculatorShee
           var p = market;
           var n = building_wages * B2Value / 100;
 
-          if (downlimit = -1) { // -1 成本价
+          if (downlimit === -1) { // -1 成本价
             if (p - 8 < 0) {
               var startSellPrice = parseFloat((Math.floor(p / 0.01) * 0.01).toFixed(2));
               var endSellPrice = parseFloat((p * upLimit).toFixed(2));
@@ -621,7 +621,7 @@ function marketSpeed(marketData, replacedList, dataValues, count, calculatorShee
           var p = market;
           var n = building_wages * B2Value / 100;
 
-          if (downlimit = -1) { // -1 成本价
+          if (downlimit === -1) { // -1 成本价
             if (p - 8 < 0) {
               var startSellPrice = parseFloat((Math.floor(p / 0.01) * 0.01).toFixed(2));
               var endSellPrice = parseFloat((p * upLimit).toFixed(2));

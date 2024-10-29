@@ -422,7 +422,7 @@ function calculateCostAllValues(cost, averagePrice, marketSaturation, building_w
   var p = cost;
   var n = building_wages * B2Value / 100;
 
-  if (downlimit = -1) { // -1 成本价
+  if (downlimit === -1) { // -1 成本价
     if (p - 8 < 0) {
       var startSellPrice = parseFloat((Math.floor(p / 0.01) * 0.01).toFixed(2));
       var endSellPrice = parseFloat((p * upLimit).toFixed(2));
