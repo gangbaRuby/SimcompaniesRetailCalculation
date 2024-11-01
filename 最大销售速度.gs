@@ -46,7 +46,7 @@ function calculateSaleSpeed(sheet, realm, sessionid_settings, sessionid) { //计
   range = calculatorSheet.getRange("A9:J");
   range.clearContent();
 
-  const mapping = {
+const mapping = {
     '苹果': 3,
     '橘子': 4,
     '葡萄': 5,
@@ -71,7 +71,7 @@ function calculateSaleSpeed(sheet, realm, sessionid_settings, sessionid) { //计
     '高跟鞋': 63,
     '手袋': 64,
     '运动鞋': 65,
-    '圣诞脆饼': 67,
+    '圣诞爆竹': 67,
     '名牌手表': 70,
     '项链': 71,
     '无人机': 98,
@@ -87,11 +87,11 @@ function calculateSaleSpeed(sheet, realm, sessionid_settings, sessionid) { //计
     '苹果派': 123,
     '橙汁': 124,
     '苹果汁': 125,
-    '姜汁啤酒': 126,
+    '姜汁汽水': 126,
     '披萨': 127,
     '面条': 128,
     '巧克力': 140,
-    'Xmas ornament': 144,
+    '圣诞装饰品': 144,
     '南瓜': 146,
     '杰克灯笼': 147,
     '女巫服': 148
@@ -136,12 +136,12 @@ function calculateSaleSpeed(sheet, realm, sessionid_settings, sessionid) { //计
 
 
   // 获取选中的物品ID
-  var select_range = calculatorSheet.getRange("O1:V14");
+  var select_range = calculatorSheet.getRange("O1:AA14");
   var values = select_range.getValues();
   var output = [];
   for (var row = 1; row < values.length; row++) { // 从第二行开始
     for (var col = 0; col < values[row].length; col++) { // 从第1列开始
-      if (values[row][col] === true && !(row === 3 && col === 3)) { // 如果单元格的值为TRUE
+      if (values[row][col] === true && !(row === 1 && col === 9) && !(row === 3 && col === 9)) { // 如果单元格的值为TRUE
         // 获取上一个单元格的内容并添加到输出数组中
         var previousCellContent = values[row - 1][col];
         output.push(previousCellContent);

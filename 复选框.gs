@@ -22,8 +22,8 @@ function onCheckboxClick(e) {
       checkboxesToSync = [sheet.getRange('O6:V6')];
     } else if (checkbox.getA1Notation() === 'N9') { // 生鲜商店
       checkboxesToSync = [
-        sheet.getRange('O8:V8'),
-        sheet.getRange('O10:V10')
+        sheet.getRange('O8:U8'),
+        sheet.getRange('O10:U10')
       ];
     } else if (checkbox.getA1Notation() === 'N12') { // 电子产品商店
       checkboxesToSync = [sheet.getRange('O12:T12')];
@@ -34,9 +34,13 @@ function onCheckboxClick(e) {
         sheet.getRange('O18:T18'),
         sheet.getRange('N20:T20')
       ];
-    } else if (checkbox.getA1Notation() === 'R4') { // Q
+    } else if (checkbox.getA1Notation() === 'X2') { // 万圣节集市
       checkboxesToSync = [
-        sheet.getRange('S4:U4')
+        sheet.getRange('Y2:AA2')
+      ];
+    } else if (checkbox.getA1Notation() === 'X4') { // 圣诞节集市
+      checkboxesToSync = [
+        sheet.getRange('Y4:Z4')
       ];
     }
 
