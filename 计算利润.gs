@@ -53,7 +53,7 @@ function calculateOptimalCosts(sheet, realm, sessionid_settings, sessionid) { //
   range.clearContent();
 
   // 获取数据信息表的数据范围
-  var dataRange = dataSheet.getRange("A2:N" + dataSheet.getLastRow());
+  var dataRange = dataSheet.getRange("A2:I" + dataSheet.getLastRow());
   var dataValues = dataRange.getValues();
 
   // 获取R1计算利润表中的A2,B2,C2单元格的值
@@ -64,6 +64,7 @@ function calculateOptimalCosts(sheet, realm, sessionid_settings, sessionid) { //
 
   var PROFIT_PER_BUILDING_LEVEL = calculatorSheet.getRange("H6").getValue();
   var RETAIL_MODELING_QUALITY_WEIGHT = calculatorSheet.getRange("J6").getValue();
+  var RETAIL_ADJUSTMENT = calculatorSheet.getRange("L6").getValue();
   var acceleration_multiplier = calculatorSheet.getRange("F3").getValue();
   var upLimit = calculatorSheet.getRange("L1").getValue();
   var downlimit = calculatorSheet.getRange("L2").getValue();
@@ -83,7 +84,7 @@ function calculateOptimalCosts(sheet, realm, sessionid_settings, sessionid) { //
     }
   }
 
-const mapping = {
+  const mapping = {
     '苹果': 3,
     '橘子': 4,
     '葡萄': 5,
@@ -213,10 +214,11 @@ const mapping = {
         var averagePrice = dataValues[j][1];
         var marketSaturation = dataValues[j][2];
         var building_wages = dataValues[j][3]
-        var buildingLevelsNeededPerHour = dataValues[j][4]
+        var buildingLevelsNeededPerUnitPerHour = dataValues[j][4]
         var modeledProductionCostPerUnit = dataValues[j][5]
         var modeledStoreWages = dataValues[j][6]
         var modeledUnitsSoldAnHour = dataValues[j][7]
+        var RETAIL_ADJUSTMENT = dataValues[j][8]
 
         var n = building_wages * B2Value / 100;
 
@@ -277,7 +279,7 @@ const mapping = {
             var vNr_a = Math.min(Math.max(2 - marketSaturation, 0), 2)
             var vNr_s = vNr_a / 2 + 0.5
             var vNr_l = quality / 12
-            var vNr_d = PROFIT_PER_BUILDING_LEVEL * (buildingLevelsNeededPerHour + 1) * (vNr_a / 2 * (1 + vNr_l * RETAIL_MODELING_QUALITY_WEIGHT)) + ((g_modeledStoreWages = modeledStoreWages) != null ? g_modeledStoreWages : 0)
+            var vNr_d = PROFIT_PER_BUILDING_LEVEL * (buildingLevelsNeededPerUnitPerHour * modeledUnitsSoldAnHour + 1) * ((v_RETAIL_ADJUSTMENT = RETAIL_ADJUSTMENT) != null ? v_RETAIL_ADJUSTMENT : 1) * (vNr_a / 2 * (1 + vNr_l * RETAIL_MODELING_QUALITY_WEIGHT)) + ((g_modeledStoreWages = modeledStoreWages) != null ? g_modeledStoreWages : 0)
             var vNr_u = modeledUnitsSoldAnHour * vNr_s
 
             // bNr函数 bNr(d, be.modeledProductionCostPerUnit, u, (f = be.modeledStoreWages) != null ? f : 0)
@@ -288,7 +290,7 @@ const mapping = {
             var vNr_p = vNr_d - (sellPrice - vNr_h) * (sellPrice - vNr_h) * xNr_a
 
             // wNr函数 wNr(p, be.modeledProductionCostPerUnit, (w = be.modeledStoreWages) != null ? w : 0, G.averageRetailPrice, 100)
-            var sj_f = 100 * ((sellPrice - modeledProductionCostPerUnit) * 3600) / (vNr_p + ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0))
+            var sj_f = (100 * ((sellPrice - modeledProductionCostPerUnit) * 3600) - ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0)) / (vNr_p + ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0))
 
             if (sj_f <= 0 && sellPrice > averagePrice) {
               break;
@@ -358,7 +360,7 @@ const mapping = {
           // 将每小时利润放到计算利润表中
           calculatorSheet.getRange("F" + (count + 9)).setValue(profitPerHour);
 
-          var [optimalSellPrice1, maxSalesPerUnitPerHour1, maxProfitPerHour1] = calculateCostAllValues(maxp, averagePrice, marketSaturation, building_wages, quality, A2Value, B2Value, C2Value, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, buildingLevelsNeededPerHour, modeledProductionCostPerUnit, modeledStoreWages, modeledUnitsSoldAnHour, upLimit, downlimit);
+          var [optimalSellPrice1, maxSalesPerUnitPerHour1, maxProfitPerHour1] = calculateCostAllValues(maxp, averagePrice, marketSaturation, building_wages, quality, A2Value, B2Value, C2Value, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, buildingLevelsNeededPerUnitPerHour, modeledProductionCostPerUnit, modeledStoreWages, modeledUnitsSoldAnHour, upLimit, downlimit);
 
           // 将售价放到计算器表中
           calculatorSheet.getRange("G" + (count + 9)).setValue(optimalSellPrice1);
@@ -413,7 +415,7 @@ const mapping = {
   calculatorSheet.getRange(6, 3).setValue(formattedTime);
 }
 
-function calculateCostAllValues(cost, averagePrice, marketSaturation, building_wages, quality, A2Value, B2Value, C2Value, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, buildingLevelsNeededPerHour, modeledProductionCostPerUnit, modeledStoreWages, modeledUnitsSoldAnHour, upLimit, downlimit) { //根据算出的成本计算最大时利润
+function calculateCostAllValues(cost, averagePrice, marketSaturation, building_wages, quality, A2Value, B2Value, C2Value, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, buildingLevelsNeededPerUnitPerHour, modeledProductionCostPerUnit, modeledStoreWages, modeledUnitsSoldAnHour, upLimit, downlimit) { //根据算出的成本计算最大时利润
 
   var maxProfitPerHour = 0;
   var maxSalesPerUnitPerHour = 0;
@@ -461,7 +463,7 @@ function calculateCostAllValues(cost, averagePrice, marketSaturation, building_w
     var vNr_a = Math.min(Math.max(2 - marketSaturation, 0), 2)
     var vNr_s = vNr_a / 2 + 0.5
     var vNr_l = quality / 12
-    var vNr_d = PROFIT_PER_BUILDING_LEVEL * (buildingLevelsNeededPerHour + 1) * (vNr_a / 2 * (1 + vNr_l * RETAIL_MODELING_QUALITY_WEIGHT)) + ((g_modeledStoreWages = modeledStoreWages) != null ? g_modeledStoreWages : 0)
+    var vNr_d = PROFIT_PER_BUILDING_LEVEL * (buildingLevelsNeededPerUnitPerHour * modeledUnitsSoldAnHour + 1) * ((v_RETAIL_ADJUSTMENT = RETAIL_ADJUSTMENT) != null ? v_RETAIL_ADJUSTMENT : 1) * (vNr_a / 2 * (1 + vNr_l * RETAIL_MODELING_QUALITY_WEIGHT)) + ((g_modeledStoreWages = modeledStoreWages) != null ? g_modeledStoreWages : 0)
     var vNr_u = modeledUnitsSoldAnHour * vNr_s
 
     // bNr函数 bNr(d, be.modeledProductionCostPerUnit, u, (f = be.modeledStoreWages) != null ? f : 0)
@@ -472,7 +474,7 @@ function calculateCostAllValues(cost, averagePrice, marketSaturation, building_w
     var vNr_p = vNr_d - (sellPrice - vNr_h) * (sellPrice - vNr_h) * xNr_a
 
     // wNr函数 wNr(p, be.modeledProductionCostPerUnit, (w = be.modeledStoreWages) != null ? w : 0, G.averageRetailPrice, 100)
-    var sj_f = 100 * ((sellPrice - modeledProductionCostPerUnit) * 3600) / (vNr_p + ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0))
+    var sj_f = (100 * ((sellPrice - modeledProductionCostPerUnit) * 3600) - ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0)) / (vNr_p + ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0))
     if (sj_f <= 0 && sellPrice > averagePrice) {
       break;
     } else {
