@@ -38,7 +38,7 @@ function onCheckboxClick(e) {
       checkboxesToSync = [
         sheet.getRange('Y2:AA2')
       ];
-    } else if (checkbox.getA1Notation() === 'X4') { // 圣诞节集市
+    } else if (checkbox.getA1Notation() === 'X4') { // Xmas市场
       checkboxesToSync = [
         sheet.getRange('Y4:Z4')
       ];

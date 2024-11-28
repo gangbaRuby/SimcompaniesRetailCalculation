@@ -46,7 +46,7 @@ function calculateSaleSpeed(sheet, realm, sessionid_settings, sessionid) { //计
   range = calculatorSheet.getRange("A9:J");
   range.clearContent();
 
-const mapping = {
+  const mapping = {
     '苹果': 3,
     '橘子': 4,
     '葡萄': 5,
@@ -128,7 +128,7 @@ const mapping = {
   var C2Value = calculatorSheet.getRange("C2").getValue();
 
   var PROFIT_PER_BUILDING_LEVEL = calculatorSheet.getRange("H6").getValue();
-    var RETAIL_MODELING_QUALITY_WEIGHT = calculatorSheet.getRange("J6").getValue();
+  var RETAIL_MODELING_QUALITY_WEIGHT = calculatorSheet.getRange("J6").getValue();
   var RETAIL_ADJUSTMENT = calculatorSheet.getRange("L6").getValue();
   var acceleration_multiplier = calculatorSheet.getRange("F3").getValue();
   var upLimit = calculatorSheet.getRange("L1").getValue();
@@ -248,8 +248,18 @@ const mapping = {
 
             // wNr函数 wNr(p, be.modeledProductionCostPerUnit, (w = be.modeledStoreWages) != null ? w : 0, G.averageRetailPrice, 100)
             var sj_f = (100 * ((sellPrice - modeledProductionCostPerUnit) * 3600) - ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0)) / (vNr_p + ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0))
-            if (sj_f <= 0 && sellPrice > averagePrice) {
-              break;
+            if (sj_f <= 0) {
+              if (sellPrice > averagePrice) {
+                break;
+              }
+              if (sellPrice - 8 < 0) {
+                sellPrice = parseFloat((sellPrice + 0.01).toFixed(2));
+              } else if (sellPrice - 2001 < 0) {
+                sellPrice = parseFloat((sellPrice + 0.1).toFixed(1));
+              } else {
+                sellPrice = parseFloat((sellPrice + 1).toFixed(0));
+              }
+              continue;
             } else {
               var sj_w = sj_f / acceleration_multiplier / 1;
               var Jq_d = sj_w - sj_w * A2Value / 100
@@ -505,8 +515,19 @@ function optionSpeed(optionData, replacedList, dataValues, count, calculatorShee
 
             // wNr函数 wNr(p, be.modeledProductionCostPerUnit, (w = be.modeledStoreWages) != null ? w : 0, G.averageRetailPrice, 100)
             var sj_f = (100 * ((sellPrice - modeledProductionCostPerUnit) * 3600) - ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0)) / (vNr_p + ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0))
-            if (sj_f <= 0 && sellPrice > averagePrice) {
-              break;
+
+            if (sj_f <= 0) {
+              if (sellPrice > averagePrice) {
+                break;
+              }
+              if (sellPrice - 8 < 0) {
+                sellPrice = parseFloat((sellPrice + 0.01).toFixed(2));
+              } else if (sellPrice - 2001 < 0) {
+                sellPrice = parseFloat((sellPrice + 0.1).toFixed(1));
+              } else {
+                sellPrice = parseFloat((sellPrice + 1).toFixed(0));
+              }
+              continue;
             } else {
               var sj_w = sj_f / acceleration_multiplier / 1;
               var Jq_d = sj_w - sj_w * A2Value / 100
@@ -674,8 +695,19 @@ function marketSpeed(marketData, replacedList, dataValues, count, calculatorShee
 
             // wNr函数 wNr(p, be.modeledProductionCostPerUnit, (w = be.modeledStoreWages) != null ? w : 0, G.averageRetailPrice, 100)
             var sj_f = (100 * ((sellPrice - modeledProductionCostPerUnit) * 3600) - ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0)) / (vNr_p + ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0))
-            if (sj_f <= 0 && sellPrice > averagePrice) {
-              break;
+
+            if (sj_f <= 0) {
+              if (sellPrice > averagePrice) {
+                break;
+              }
+              if (sellPrice - 8 < 0) {
+                sellPrice = parseFloat((sellPrice + 0.01).toFixed(2));
+              } else if (sellPrice - 2001 < 0) {
+                sellPrice = parseFloat((sellPrice + 0.1).toFixed(1));
+              } else {
+                sellPrice = parseFloat((sellPrice + 1).toFixed(0));
+              }
+              continue;
             } else {
               var sj_w = sj_f / acceleration_multiplier / 1;
               var Jq_d = sj_w - sj_w * A2Value / 100

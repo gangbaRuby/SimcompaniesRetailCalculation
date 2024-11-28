@@ -250,8 +250,18 @@ function calculateAllValues(sheet, realm, sessionid_settings, sessionid) { //计
             // wNr函数 wNr(p, be.modeledProductionCostPerUnit, (w = be.modeledStoreWages) != null ? w : 0, G.averageRetailPrice, 100)
             var sj_f = (100 * ((sellPrice - modeledProductionCostPerUnit) * 3600) - ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0)) / (vNr_p + ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0))
 
-            if (sj_f <= 0 && sellPrice > averagePrice) {
-              break;
+            if (sj_f <= 0) {
+              if (sellPrice > averagePrice) {
+                break;
+              }
+              if (sellPrice - 8 < 0) {
+                sellPrice = parseFloat((sellPrice + 0.01).toFixed(2));
+              } else if (sellPrice - 2001 < 0) {
+                sellPrice = parseFloat((sellPrice + 0.1).toFixed(1));
+              } else {
+                sellPrice = parseFloat((sellPrice + 1).toFixed(0));
+              }
+              continue;
             } else {
               var sj_w = sj_f / acceleration_multiplier / 1;
               var Jq_d = sj_w - sj_w * A2Value / 100
@@ -508,8 +518,18 @@ function optionAllValues(optionData, replacedList, dataValues, count, calculator
             // wNr函数 wNr(p, be.modeledProductionCostPerUnit, (w = be.modeledStoreWages) != null ? w : 0, G.averageRetailPrice, 100)
             var sj_f = (100 * ((sellPrice - modeledProductionCostPerUnit) * 3600) - ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0)) / (vNr_p + ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0))
 
-            if (sj_f <= 0 && sellPrice > averagePrice) {
-              break;
+            if (sj_f <= 0) {
+              if (sellPrice > averagePrice) {
+                break;
+              }
+              if (sellPrice - 8 < 0) {
+                sellPrice = parseFloat((sellPrice + 0.01).toFixed(2));
+              } else if (sellPrice - 2001 < 0) {
+                sellPrice = parseFloat((sellPrice + 0.1).toFixed(1));
+              } else {
+                sellPrice = parseFloat((sellPrice + 1).toFixed(0));
+              }
+              continue;
             } else {
               var sj_w = sj_f / acceleration_multiplier / 1;
               var Jq_d = sj_w - sj_w * A2Value / 100
@@ -679,8 +699,18 @@ function marketAllValues(marketData, replacedList, dataValues, count, calculator
             // wNr函数 wNr(p, be.modeledProductionCostPerUnit, (w = be.modeledStoreWages) != null ? w : 0, G.averageRetailPrice, 100)
             var sj_f = (100 * ((sellPrice - modeledProductionCostPerUnit) * 3600) - ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0)) / (vNr_p + ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0))
 
-            if (sj_f <= 0 && sellPrice > averagePrice) {
-              break;
+            if (sj_f <= 0) {
+              if (sellPrice > averagePrice) {
+                break;
+              }
+              if (sellPrice - 8 < 0) {
+                sellPrice = parseFloat((sellPrice + 0.01).toFixed(2));
+              } else if (sellPrice - 2001 < 0) {
+                sellPrice = parseFloat((sellPrice + 0.1).toFixed(1));
+              } else {
+                sellPrice = parseFloat((sellPrice + 1).toFixed(0));
+              }
+              continue;
             } else {
               var sj_w = sj_f / acceleration_multiplier / 1;
               var Jq_d = sj_w - sj_w * A2Value / 100
