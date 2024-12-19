@@ -3,7 +3,7 @@ function onEdit7(e) {
   var sheet = range.getSheet();
 
   // 检查是否在“R1计算器（最大销售速度）”工作表中编辑了单元格 C5，并且值为 TRUE
-  if (sheet.getName() == "R1计算器（最大销售速度）" && range.getRow() == 5 && range.getColumn() == 3 && range.getValue() == true) {
+  if (sheet.getName() === "R1计算器（最大销售速度）" && range.getRow() === 5 && range.getColumn() === 3 && range.getValue() === true) {
     // 调用 calculateSaleSpeed 函数 参数R1计算器（最大销售速度）
     var R1 = 'R1';
     var sessionid_settings = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("使用说明");
@@ -15,7 +15,7 @@ function onEdit7(e) {
   }
 
   // 检查是否在“R2计算器（最大销售速度）”工作表中编辑了单元格 C5，并且值为 TRUE
-  if (sheet.getName() == "R2计算器（最大销售速度）" && range.getRow() == 5 && range.getColumn() == 3 && range.getValue() == true) {
+  if (sheet.getName() === "R2计算器（最大销售速度）" && range.getRow() === 5 && range.getColumn() === 3 && range.getValue() === true) {
     // 调用 calculateSaleSpeed 函数 参数R2计算器（最大销售速度）
     var R2 = 'R2';
     var sessionid_settings = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("使用说明");
@@ -30,10 +30,10 @@ function onEdit7(e) {
 function calculateSaleSpeed(sheet, realm, sessionid_settings, sessionid) { //计算最大时利润
 
   if (sessionid != null) {
-    if (realm == 'R1') {
+    if (realm === 'R1') {
       sessionid_settings.getRange(1, 7).setValue(getAdministration_overhead(sessionid))
     }
-    else if (realm == 'R2') {
+    else if (realm === 'R2') {
       sessionid_settings.getRange(2, 7).setValue(getAdministration_overhead(sessionid))
     }
   }
@@ -94,7 +94,8 @@ function calculateSaleSpeed(sheet, realm, sessionid_settings, sessionid) { //计
     '圣诞装饰品': 144,
     '南瓜': 146,
     '杰克灯笼': 147,
-    '女巫服': 148
+    '女巫服': 148,
+    '树': 150
   };
 
 
@@ -103,7 +104,7 @@ function calculateSaleSpeed(sheet, realm, sessionid_settings, sessionid) { //计
   var inventoryData = inventoryRange.getValues();
 
   // 获取数据信息表的数据范围
-  var dataRange = dataSheet.getRange("A2:I" + dataSheet.getLastRow());
+  var dataRange = dataSheet.getRange("A2:J" + dataSheet.getLastRow());
   var dataValues = dataRange.getValues();
 
   // 获取自定义库存信息
@@ -184,16 +185,17 @@ function calculateSaleSpeed(sheet, realm, sessionid_settings, sessionid) { //计
 
       // 在数据信息表中查找与当前行匹配的 ID
       for (var j = 0; j < dataValues.length; j++) {
-        if (dataValues[j][0] == db_letter) {
+        if ((dataValues[j][0] === db_letter && dataValues[j][3] === '') || (dataValues[j][0] === db_letter && dataValues[j][3] === quality)) {
           // 计算公式H
           var averagePrice = dataValues[j][1];
           var marketSaturation = dataValues[j][2];
-          var building_wages = dataValues[j][3]
-          var buildingLevelsNeededPerUnitPerHour = dataValues[j][4]
-          var modeledProductionCostPerUnit = dataValues[j][5]
-          var modeledStoreWages = dataValues[j][6]
-          var modeledUnitsSoldAnHour = dataValues[j][7]
-          var RETAIL_ADJUSTMENT = dataValues[j][8]
+          // var modelQuality = dataValues[j][3]
+          var building_wages = dataValues[j][4]
+          var buildingLevelsNeededPerUnitPerHour = dataValues[j][5]
+          var modeledProductionCostPerUnit = dataValues[j][6]
+          var modeledStoreWages = dataValues[j][7]
+          var modeledUnitsSoldAnHour = dataValues[j][8]
+          var RETAIL_ADJUSTMENT = dataValues[j][9]
 
           var p = ((workers + admin + material1 + material2 + material3 + material4 + material5 + market) / amount).toFixed(3);
           var n = building_wages * B2Value / 100;
@@ -336,21 +338,21 @@ function calculateSaleSpeed(sheet, realm, sessionid_settings, sessionid) { //计
           calculatorSheet.getRange("G" + (count + 9)).setValue(maxProfitPerHour);
 
           // 将销售时间放到计算器表中
-          if (maxProfitPerHour == 0) {
+          if (maxProfitPerHour === 0) {
             calculatorSheet.getRange("H" + (count + 9)).setValue(0);
           } else {
             calculatorSheet.getRange("H" + (count + 9)).setValue(sellTime);
           }
 
           // 将使用商店数量(48小时)放到计算器表中
-          if (maxProfitPerHour == 0) {
+          if (maxProfitPerHour === 0) {
             calculatorSheet.getRange("I" + (count + 9)).setValue(0);
           } else {
             calculatorSheet.getRange("I" + (count + 9)).setValue(costStore);
           }
 
           // 将单品总利润放到计算器表中
-          if (maxProfitPerHour == 0) {
+          if (maxProfitPerHour === 0) {
             calculatorSheet.getRange("J" + (count + 9)).setValue(0);
           } else {
             var singleGoodTotalProfit = (maxProfitPerHour / maxSalesPerUnitPerHour) * amount;
@@ -375,9 +377,9 @@ function calculateSaleSpeed(sheet, realm, sessionid_settings, sessionid) { //计
 
   var marketButton = calculatorSheet.getRange("F5").getValue();
   if (marketButton) {
-    if (realm == 'R1') {
+    if (realm === 'R1') {
       get_price(sheet, 0);
-    } else if (realm == 'R2') {
+    } else if (realm === 'R2') {
       get_price(sheet, 1);
     }
     // 获取市场价格信息
@@ -452,16 +454,16 @@ function optionSpeed(optionData, replacedList, dataValues, count, calculatorShee
 
       // 在数据信息表中查找与当前行匹配的 ID
       for (var j = 0; j < dataValues.length; j++) {
-        if (dataValues[j][0] == db_letter) {
+        if ((dataValues[j][0] === db_letter && dataValues[j][3] === '') || (dataValues[j][0] === db_letter && dataValues[j][3] === quality)) {
           // 计算公式H
           var averagePrice = dataValues[j][1];
           var marketSaturation = dataValues[j][2];
-          var building_wages = dataValues[j][3]
-          var buildingLevelsNeededPerUnitPerHour = dataValues[j][4]
-          var modeledProductionCostPerUnit = dataValues[j][5]
-          var modeledStoreWages = dataValues[j][6]
-          var modeledUnitsSoldAnHour = dataValues[j][7]
-          var RETAIL_ADJUSTMENT = dataValues[j][8]
+          var building_wages = dataValues[j][4]
+          var buildingLevelsNeededPerUnitPerHour = dataValues[j][5]
+          var modeledProductionCostPerUnit = dataValues[j][6]
+          var modeledStoreWages = dataValues[j][7]
+          var modeledUnitsSoldAnHour = dataValues[j][8]
+          var RETAIL_ADJUSTMENT = dataValues[j][9]
 
           var p = market;
           var n = building_wages * B2Value / 100;
@@ -632,16 +634,16 @@ function marketSpeed(marketData, replacedList, dataValues, count, calculatorShee
 
       // 在数据信息表中查找与当前行匹配的 ID
       for (var j = 0; j < dataValues.length; j++) {
-        if (dataValues[j][0] == db_letter) {
+        if ((dataValues[j][0] === db_letter && dataValues[j][3] === '') || (dataValues[j][0] === db_letter && dataValues[j][3] === quality)) {
           // 计算公式H
           var averagePrice = dataValues[j][1];
           var marketSaturation = dataValues[j][2];
-          var building_wages = dataValues[j][3]
-          var buildingLevelsNeededPerUnitPerHour = dataValues[j][4]
-          var modeledProductionCostPerUnit = dataValues[j][5]
-          var modeledStoreWages = dataValues[j][6]
-          var modeledUnitsSoldAnHour = dataValues[j][7]
-          var RETAIL_ADJUSTMENT = dataValues[j][8]
+          var building_wages = dataValues[j][4]
+          var buildingLevelsNeededPerUnitPerHour = dataValues[j][5]
+          var modeledProductionCostPerUnit = dataValues[j][6]
+          var modeledStoreWages = dataValues[j][7]
+          var modeledUnitsSoldAnHour = dataValues[j][8]
+          var RETAIL_ADJUSTMENT = dataValues[j][9]
 
           var p = market;
           var n = building_wages * B2Value / 100;

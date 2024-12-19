@@ -35,6 +35,9 @@ function onEdit1(e) {
 
 function fetchDataAndInsertToSheet(sessionid, realm, realm_id, customEconomyState, customEconomyStateButton, sessionid_settings) {//获取模型信息
 
+
+
+
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(realm + "数据信息");
   var calculatorSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(realm + "计算器");
   var profitSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(realm + "固定利润算成本");
@@ -75,20 +78,20 @@ function fetchDataAndInsertToSheet(sessionid, realm, realm_id, customEconomyStat
   // 如果数据表不存在，创建一个新表
   if (!sheet) {
     //表头
-    var headers1 = ["ID", "averagePrice", "marketSaturation"];
+    var headers1 = ["ID", "averagePrice", "marketSaturation", "quality"];
     var headers3 = ["building_wages"];
     var headers4 = ["buildingLevelsNeededPerUnitPerHour", "modeledProductionCostPerUnit", "modeledStoreWages", "modeledUnitsSoldAnHour"];
 
     sheet = SpreadsheetApp.getActiveSpreadsheet().insertSheet(realm + "数据信息");
     sheet.getRange(1, 1, 1, headers1.length).setValues([headers1]);  // 在第一行写入表头
-    sheet.getRange(1, 4, 1, headers3.length).setValues([headers3]);  // 在第一行写入表头
-    sheet.getRange(1, 5, 1, headers4.length).setValues([headers4]);  // 在第一行写入表头
+    sheet.getRange(1, 5, 1, headers3.length).setValues([headers3]);  // 在第一行写入表头
+    sheet.getRange(1, 6, 1, headers4.length).setValues([headers4]);  // 在第一行写入表头
   }
 
   // 清空表格中原有的数据
-  var clear_range = sheet.getRange("A2:C");
+  var clear_range = sheet.getRange("A2:D");
   clear_range.clearContent();
-  var clear_range2 = sheet.getRange("E2:H");
+  var clear_range2 = sheet.getRange("F2:I");
   clear_range2.clearContent();
 
 
@@ -102,20 +105,23 @@ function fetchDataAndInsertToSheet(sessionid, realm, realm_id, customEconomyStat
     var ID = item.dbLetter;
     var averagePrice = item.averagePrice;
     var saturation = item.saturation;
+    var quality = item.quality;
 
-    rowData1.push([ID, averagePrice, saturation]);
+    rowData1.push([ID, averagePrice, saturation, quality]);
   })
 
-  var idsToCheck = [146, 147, 148];
-  idsToCheck.forEach(function (id) {
-    if (!rowData1.some(function (row) { return row[0] === id; })) {
-      rowData1.push([id, '', '']); // 添加缺失的 ID，后面为空数据
-    }
-  });
+  // Logger.log(rowData1)
+
+  // var idsToCheck = [146, 147, 148];
+  // idsToCheck.forEach(function (id) {
+  //   if (!rowData1.some(function (row) { return row[0] === id; })) {
+  //     rowData1.push([id, '', '']); // 添加缺失的 ID，后面为空数据
+  //   }
+  // });
 
   // 动态生成rowData3数组
   var rowData3 = downloadAndExtractData(realm_id, economyState, calculatorSheet, profitSheet, speedSheet, optionSellPriceSheet, defaultObject);
-  // Logger.log(rowData3)
+
 
 
 
@@ -123,32 +129,39 @@ function fetchDataAndInsertToSheet(sessionid, realm, realm_id, customEconomyStat
   var updatedData1 = [];
   // 遍历 `rowData1`，并与 `rowData3` 数据匹配
   rowData1.forEach(function (row) {
-    var id = row[0]; // 获取 `rowData1` 中的 `ID`
+    var updatedData1_id = row[0]; // 获取 `rowData1` 中的 `ID`
+    var updatedData1_quality = row[3]; // 获取 `rowData1` 中的 `quality`
 
-    // 根据 ID 查找 `rowData2` 中的数据
-    var matchingData = rowData3[id];
+    // 根据 ID 查找 `rowData3` 中的数据
+    let matchingData = rowData3[updatedData1_id];
 
-    // 如果找到匹配的数据，则拼接；否则，将空数据追加
-    if (matchingData) {
-      updatedData1.push(row.concat(matchingData));
-    } else {
-      updatedData1.push(row.concat(['', '', '', '', '', '']));
-    }
+    if (updatedData1_quality == null) {
+      if (matchingData) {
+        updatedData1.push(row.concat(matchingData));
+      } else {
+        updatedData1.push(row.concat(['', '', '', '', '', '']));
+      }
+    } else
+      if (matchingData) {
+        updatedData1.push(row.concat(rowData3[updatedData1_id][updatedData1_quality]));
+      } else {
+        updatedData1.push(row.concat(['', '', '', '', '', '']));
+      }
   });
 
 
 
   // 写入前3列
   var firstPart = updatedData1.map(function (row) {
-    return row.slice(0, 3); // 取前3列
+    return row.slice(0, 4); // 取前3列
   });
-  sheet.getRange(2, 1, firstPart.length, 3).setValues(firstPart);
+  sheet.getRange(2, 1, firstPart.length, 4).setValues(firstPart);
 
   // 写入最后4列
   var secondPart = updatedData1.map(function (row) {
     return row.slice(-4); // 取最后4列
   });
-  sheet.getRange(2, 5, secondPart.length, 4).setValues(secondPart);
+  sheet.getRange(2, 6, secondPart.length, 4).setValues(secondPart);
 
 
   if (economyState == 0) {
@@ -233,7 +246,7 @@ function fetchDataAndInsertToSheet(sessionid, realm, realm_id, customEconomyStat
 
 
 
-function get_economyState(sessionid) {
+function get_economyState(sessionid) { //获取周期
   var url = "https://www.simcompanies.com/api/v2/companies/me/";
 
   // 设置 cookies
@@ -323,7 +336,8 @@ function downloadAndExtractData(realm_id, economyState, calculatorSheet, profitS
 
 function extractJsonString(content) {
   // 使用正则表达式查找以 "{0:{1:{buildingLevelsNeededPerUnitPerHour:" 开头，以 "}}}" 结尾的内容
-  var jsonStringMatch = content.match(/\{0:\{1:\{buildingLevelsNeededPerUnitPerHour:[\s\S]*?\}\}\}/);
+  var jsonStringMatch = content.match(/\{0:\{1:\{buildingLevelsNeededPerUnitPerHour:[\s\S]*?\}\}\}\}\}/);
+
   return jsonStringMatch ? jsonStringMatch[0] : null;
 }
 
@@ -334,10 +348,18 @@ function convertToValidJson(jsonDataString) {
   // 替换以小数点开头的数字
   jsonDataString = jsonDataString.replace(/:\s*\.(\d+)/g, ': 0.$1');
 
+
+
+  // 设置每次输出的字符限制
+  // var chunkSize = 1000; // 可以根据需要调整这个大小
+  // for (var i = 0; i < jsonDataString.length; i += chunkSize) {
+  //   Logger.log(jsonDataString.slice(i, i + chunkSize));
+  // }
+
   return jsonDataString;
 }
 
-function extractData(data, realm_id, economyState) {
+function extractData(data, realm_id, economyState) { //提取四个模型参数
 
   var rowData3 = [];
 
@@ -347,24 +369,46 @@ function extractData(data, realm_id, economyState) {
     // 遍历 economyData 下的所有 ID
     for (var id in economyData) {
 
-      var modelData = economyData[id];
+      var economyData = data[economyState];
 
-      // 提取数据
-      var buildingLevelsNeededPerUnitPerHour = modelData.buildingLevelsNeededPerUnitPerHour;
-      var modeledProductionCostPerUnit = modelData.modeledProductionCostPerUnit;
-      var modeledStoreWages = modelData.modeledStoreWages;
-      var modeledUnitsSoldAnHour = modelData.modeledUnitsSoldAnHour;
+      // 遍历 economyData 下的所有 ID
+      for (var id in economyData) {
+        var modelData = economyData[id];
 
-      // 将提取的数据存储在 rowData3 数组中，以 `id` 为键存储
-      rowData3[id] = [buildingLevelsNeededPerUnitPerHour, modeledProductionCostPerUnit, modeledStoreWages, modeledUnitsSoldAnHour];
+        // 检查是否存在 quality 属性
+        var quality = modelData.hasOwnProperty('quality') ? modelData.quality : null;
 
+        if (quality) {
+          // 如果 quality 存在，遍历 quality 数组
+          rowData3[id] = []; // 初始化该 ID 对应的数组
+          for (var qIndex in quality) {
+            var qData = quality[qIndex];
+
+            // 将 quality 下的数据存储到数组中
+            rowData3[id].push([
+              qData.buildingLevelsNeededPerUnitPerHour,
+              qData.modeledProductionCostPerUnit,
+              qData.modeledStoreWages,
+              qData.modeledUnitsSoldAnHour
+            ]);
+          }
+        } else {
+          // 如果没有 quality，使用原始 modelData 的数据
+          rowData3[id] = [
+            modelData.buildingLevelsNeededPerUnitPerHour,
+            modelData.modeledProductionCostPerUnit,
+            modelData.modeledStoreWages,
+            modelData.modeledUnitsSoldAnHour
+          ];
+        }
+      }
     }
   }
 
   return rowData3;
 }
 
-function fetchScriptUrl() {
+function fetchScriptUrl() { //获取js文件
   const url = 'https://www.simcompanies.com';
   const response = UrlFetchApp.fetch(url);
   const html = response.getContentText();
@@ -396,9 +440,9 @@ function extractValuesFromJS(jsContent, defaultObject) {
 
   // 获取 RETAIL_ADJUSTMENT 对象中的数值数组
   var adjustmentValue = extractadjustmentValue(jsContent, adjustmentName);
-Logger.log(adjustmentValue)
+  Logger.log(adjustmentValue)
 
-updateObjectWithAdjustment(defaultObject, adjustmentValue);
+  updateObjectWithAdjustment(defaultObject, adjustmentValue);
 
 
   return {
@@ -429,11 +473,11 @@ function extractadjustmentValue(jsContent, variableName) {
   // 使用正则表达式查找变量赋值
   var regex = new RegExp(variableName + '\\s*=\\s*(\\{[^}]*\\})');
   var match = jsContent.match(regex);
-  
+
   // 如果找到匹配的字符串
   if (match) {
     var adjustmentString = match[1];
-    
+
     // 使用 eval 将对象字面量字符串转换为对象
     try {
       var adjustmentValue = eval('(' + adjustmentString + ')'); // 注意：eval()括号必须加上
@@ -442,9 +486,9 @@ function extractadjustmentValue(jsContent, variableName) {
       Logger.log('Error parsing string: ' + e.message);
     }
   }
-  
+
   return null;
-  
+
 
 
 }

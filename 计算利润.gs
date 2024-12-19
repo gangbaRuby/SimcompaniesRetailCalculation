@@ -3,7 +3,7 @@ function onEdit5(e) {
   var sheet = range.getSheet();
 
   // 检查是否在“R1计算利润”工作表中编辑了单元格 C5，并且值为 TRUE
-  if (sheet.getName() == "R1固定利润算成本" && range.getRow() == 5 && range.getColumn() == 3 && range.getValue() == true) {
+  if (sheet.getName() === "R1固定利润算成本" && range.getRow() === 5 && range.getColumn() === 3 && range.getValue() === true) {
 
     var R1 = 'R1';
     var sessionid_settings = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("使用说明");
@@ -17,7 +17,7 @@ function onEdit5(e) {
   }
 
   // 检查是否在“R2计算利润”工作表中编辑了单元格 C5，并且值为 TRUE
-  if (sheet.getName() == "R2固定利润算成本" && range.getRow() == 5 && range.getColumn() == 3 && range.getValue() == true) {
+  if (sheet.getName() === "R2固定利润算成本" && range.getRow() === 5 && range.getColumn() === 3 && range.getValue() === true) {
 
     var R2 = 'R2';
     var sessionid_settings = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("使用说明");
@@ -34,10 +34,10 @@ function onEdit5(e) {
 function calculateOptimalCosts(sheet, realm, sessionid_settings, sessionid) { //计算指定时利润下,最大每小时销售/单位，最大成本
 
   if (sessionid != null) {
-    if (realm == 'R1') {
+    if (realm === 'R1') {
       sessionid_settings.getRange(1, 7).setValue(getAdministration_overhead(sessionid))
     }
-    else if (realm == 'R2') {
+    else if (realm === 'R2') {
       sessionid_settings.getRange(2, 7).setValue(getAdministration_overhead(sessionid))
     }
   }
@@ -53,7 +53,7 @@ function calculateOptimalCosts(sheet, realm, sessionid_settings, sessionid) { //
   range.clearContent();
 
   // 获取数据信息表的数据范围
-  var dataRange = dataSheet.getRange("A2:I" + dataSheet.getLastRow());
+  var dataRange = dataSheet.getRange("A2:J" + dataSheet.getLastRow());
   var dataValues = dataRange.getValues();
 
   // 获取R1计算利润表中的A2,B2,C2单元格的值
@@ -132,7 +132,8 @@ function calculateOptimalCosts(sheet, realm, sessionid_settings, sessionid) { //
     '圣诞装饰品': 144,
     '南瓜': 146,
     '杰克灯笼': 147,
-    '女巫服': 148
+    '女巫服': 148,
+    '树': 150
   };
   const replacedList = output.map(item => mapping[item]); //汉字转ID
 
@@ -202,30 +203,33 @@ function calculateOptimalCosts(sheet, realm, sessionid_settings, sessionid) { //
 
     db_letter = replacedList[i] //获取要计算的物品ID
 
-    for (var j = 0; j < dataValues.length; j++) {
-      if (dataValues[j][0] == db_letter) {
+    for (k = 0; k < quality_replacedList.length; k++) {
 
-        // 计算公式w 每级每小时利润
-        var w = I1Value;
+      quality = quality_replacedList[k]; //获取要计算的物品品质
 
-        // 计算每小时利润
-        var profitPerHour = w * C2Value;
+      for (var j = 0; j < dataValues.length; j++) {
+        if ((dataValues[j][0] === db_letter && dataValues[j][3] === '') || (dataValues[j][0] === db_letter && dataValues[j][3] === quality)) {
 
-        var averagePrice = dataValues[j][1];
-        var marketSaturation = dataValues[j][2];
-        var building_wages = dataValues[j][3]
-        var buildingLevelsNeededPerUnitPerHour = dataValues[j][4]
-        var modeledProductionCostPerUnit = dataValues[j][5]
-        var modeledStoreWages = dataValues[j][6]
-        var modeledUnitsSoldAnHour = dataValues[j][7]
-        var RETAIL_ADJUSTMENT = dataValues[j][8]
+          // 计算公式w 每级每小时利润
+          var w = I1Value;
 
-        var n = building_wages * B2Value / 100;
+          // 计算每小时利润
+          var profitPerHour = w * C2Value;
 
-        // 使用 while 循环来遍历范围
-        for (k = 0; k < quality_replacedList.length; k++) {
+          var averagePrice = dataValues[j][1];
+          var marketSaturation = dataValues[j][2];
+          // var modelQuality = dataValues[j][3]
+          var building_wages = dataValues[j][4]
+          var buildingLevelsNeededPerUnitPerHour = dataValues[j][5]
+          var modeledProductionCostPerUnit = dataValues[j][6]
+          var modeledStoreWages = dataValues[j][7]
+          var modeledUnitsSoldAnHour = dataValues[j][8]
+          var RETAIL_ADJUSTMENT = dataValues[j][9]
 
-          quality = quality_replacedList[k]; //获取要计算的物品品质
+          var n = building_wages * B2Value / 100;
+
+
+
 
           var maxp = 0;
           var maxSalesPerUnitPerHour = 0;
@@ -392,7 +396,7 @@ function calculateOptimalCosts(sheet, realm, sessionid_settings, sessionid) { //
 
 
 
-        break;
+        
 
       }
     }
@@ -550,4 +554,3 @@ function calculateCostAllValues(cost, averagePrice, marketSaturation, building_w
 
 
 }
-

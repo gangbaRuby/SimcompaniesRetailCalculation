@@ -91,7 +91,8 @@ const mapping = {
     '圣诞装饰品': 144,
     '南瓜': 146,
     '杰克灯笼': 147,
-    '女巫服': 148
+    '女巫服': 148,
+    '树': 150
   };
   const replacedList = output.map(item => mapping[item]);
 
