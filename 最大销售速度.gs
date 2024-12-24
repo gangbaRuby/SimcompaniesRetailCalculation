@@ -189,7 +189,7 @@ function calculateSaleSpeed(sheet, realm, sessionid_settings, sessionid) { //计
           // 计算公式H
           var averagePrice = dataValues[j][1];
           var marketSaturation = dataValues[j][2];
-          // var modelQuality = dataValues[j][3]
+          var modelQuality = dataValues[j][3]
           var building_wages = dataValues[j][4]
           var buildingLevelsNeededPerUnitPerHour = dataValues[j][5]
           var modeledProductionCostPerUnit = dataValues[j][6]
@@ -237,7 +237,7 @@ function calculateSaleSpeed(sheet, realm, sessionid_settings, sessionid) { //计
             // vNr函数 f = vNr(be, n, G.marketSaturation, 100, G.averageRetailPrice),
             var vNr_a = Math.min(Math.max(2 - marketSaturation, 0), 2)
             var vNr_s = vNr_a / 2 + 0.5
-            var vNr_l = quality / 12
+            var vNr_l = (modelQuality === '') ? quality / 12 : 0
             var vNr_d = PROFIT_PER_BUILDING_LEVEL * (buildingLevelsNeededPerUnitPerHour * modeledUnitsSoldAnHour + 1) * ((v_RETAIL_ADJUSTMENT = RETAIL_ADJUSTMENT) != null ? v_RETAIL_ADJUSTMENT : 1) * (vNr_a / 2 * (1 + vNr_l * RETAIL_MODELING_QUALITY_WEIGHT)) + ((g_modeledStoreWages = modeledStoreWages) != null ? g_modeledStoreWages : 0)
             var vNr_u = modeledUnitsSoldAnHour * vNr_s
 
@@ -458,6 +458,7 @@ function optionSpeed(optionData, replacedList, dataValues, count, calculatorShee
           // 计算公式H
           var averagePrice = dataValues[j][1];
           var marketSaturation = dataValues[j][2];
+          var modelQuality = dataValues[j][3]
           var building_wages = dataValues[j][4]
           var buildingLevelsNeededPerUnitPerHour = dataValues[j][5]
           var modeledProductionCostPerUnit = dataValues[j][6]
@@ -504,7 +505,7 @@ function optionSpeed(optionData, replacedList, dataValues, count, calculatorShee
             // vNr函数 f = vNr(be, n, G.marketSaturation, 100, G.averageRetailPrice),
             var vNr_a = Math.min(Math.max(2 - marketSaturation, 0), 2)
             var vNr_s = vNr_a / 2 + 0.5
-            var vNr_l = quality / 12
+            var vNr_l = (modelQuality === '') ? quality / 12 : 0
             var vNr_d = PROFIT_PER_BUILDING_LEVEL * (buildingLevelsNeededPerUnitPerHour * modeledUnitsSoldAnHour + 1) * ((v_RETAIL_ADJUSTMENT = RETAIL_ADJUSTMENT) != null ? v_RETAIL_ADJUSTMENT : 1) * (vNr_a / 2 * (1 + vNr_l * RETAIL_MODELING_QUALITY_WEIGHT)) + ((g_modeledStoreWages = modeledStoreWages) != null ? g_modeledStoreWages : 0)
             var vNr_u = modeledUnitsSoldAnHour * vNr_s
 
@@ -638,6 +639,7 @@ function marketSpeed(marketData, replacedList, dataValues, count, calculatorShee
           // 计算公式H
           var averagePrice = dataValues[j][1];
           var marketSaturation = dataValues[j][2];
+          var modelQuality = dataValues[j][3]
           var building_wages = dataValues[j][4]
           var buildingLevelsNeededPerUnitPerHour = dataValues[j][5]
           var modeledProductionCostPerUnit = dataValues[j][6]
@@ -684,7 +686,7 @@ function marketSpeed(marketData, replacedList, dataValues, count, calculatorShee
             // vNr函数 f = vNr(be, n, G.marketSaturation, 100, G.averageRetailPrice),
             var vNr_a = Math.min(Math.max(2 - marketSaturation, 0), 2)
             var vNr_s = vNr_a / 2 + 0.5
-            var vNr_l = quality / 12
+            var vNr_l = (modelQuality === '') ? quality / 12 : 0
             var vNr_d = PROFIT_PER_BUILDING_LEVEL * (buildingLevelsNeededPerUnitPerHour * modeledUnitsSoldAnHour + 1) * ((v_RETAIL_ADJUSTMENT = RETAIL_ADJUSTMENT) != null ? v_RETAIL_ADJUSTMENT : 1) * (vNr_a / 2 * (1 + vNr_l * RETAIL_MODELING_QUALITY_WEIGHT)) + ((g_modeledStoreWages = modeledStoreWages) != null ? g_modeledStoreWages : 0)
             var vNr_u = modeledUnitsSoldAnHour * vNr_s
 

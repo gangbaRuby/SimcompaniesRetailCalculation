@@ -218,7 +218,7 @@ function calculateOptimalCosts(sheet, realm, sessionid_settings, sessionid) { //
 
           var averagePrice = dataValues[j][1];
           var marketSaturation = dataValues[j][2];
-          // var modelQuality = dataValues[j][3]
+          var modelQuality = dataValues[j][3]
           var building_wages = dataValues[j][4]
           var buildingLevelsNeededPerUnitPerHour = dataValues[j][5]
           var modeledProductionCostPerUnit = dataValues[j][6]
@@ -282,7 +282,7 @@ function calculateOptimalCosts(sheet, realm, sessionid_settings, sessionid) { //
             // vNr函数 f = vNr(be, n, G.marketSaturation, 100, G.averageRetailPrice),
             var vNr_a = Math.min(Math.max(2 - marketSaturation, 0), 2)
             var vNr_s = vNr_a / 2 + 0.5
-            var vNr_l = quality / 12
+            var vNr_l = (modelQuality === '') ? quality / 12 : 0
             var vNr_d = PROFIT_PER_BUILDING_LEVEL * (buildingLevelsNeededPerUnitPerHour * modeledUnitsSoldAnHour + 1) * ((v_RETAIL_ADJUSTMENT = RETAIL_ADJUSTMENT) != null ? v_RETAIL_ADJUSTMENT : 1) * (vNr_a / 2 * (1 + vNr_l * RETAIL_MODELING_QUALITY_WEIGHT)) + ((g_modeledStoreWages = modeledStoreWages) != null ? g_modeledStoreWages : 0)
             var vNr_u = modeledUnitsSoldAnHour * vNr_s
 
@@ -375,7 +375,7 @@ function calculateOptimalCosts(sheet, realm, sessionid_settings, sessionid) { //
           // 将每小时利润放到计算利润表中
           calculatorSheet.getRange("F" + (count + 9)).setValue(profitPerHour);
 
-          var [optimalSellPrice1, maxSalesPerUnitPerHour1, maxProfitPerHour1] = calculateCostAllValues(maxp, averagePrice, marketSaturation, building_wages, quality, A2Value, B2Value, C2Value, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, buildingLevelsNeededPerUnitPerHour, modeledProductionCostPerUnit, modeledStoreWages, modeledUnitsSoldAnHour, upLimit, downlimit, RETAIL_ADJUSTMENT);
+          var [optimalSellPrice1, maxSalesPerUnitPerHour1, maxProfitPerHour1] = calculateCostAllValues(maxp, averagePrice, marketSaturation, building_wages, quality, A2Value, B2Value, C2Value, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, buildingLevelsNeededPerUnitPerHour, modeledProductionCostPerUnit, modeledStoreWages, modeledUnitsSoldAnHour, upLimit, downlimit, RETAIL_ADJUSTMENT, modelQuality);
 
           // 将售价放到计算器表中
           calculatorSheet.getRange("G" + (count + 9)).setValue(optimalSellPrice1);
@@ -430,7 +430,7 @@ function calculateOptimalCosts(sheet, realm, sessionid_settings, sessionid) { //
   calculatorSheet.getRange(6, 3).setValue(formattedTime);
 }
 
-function calculateCostAllValues(cost, averagePrice, marketSaturation, building_wages, quality, A2Value, B2Value, C2Value, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, buildingLevelsNeededPerUnitPerHour, modeledProductionCostPerUnit, modeledStoreWages, modeledUnitsSoldAnHour, upLimit, downlimit, RETAIL_ADJUSTMENT) { //根据算出的成本计算最大时利润
+function calculateCostAllValues(cost, averagePrice, marketSaturation, building_wages, quality, A2Value, B2Value, C2Value, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, buildingLevelsNeededPerUnitPerHour, modeledProductionCostPerUnit, modeledStoreWages, modeledUnitsSoldAnHour, upLimit, downlimit, RETAIL_ADJUSTMENT, modelQuality) { //根据算出的成本计算最大时利润
 
   var maxProfitPerHour = 0;
   var maxSalesPerUnitPerHour = 0;
@@ -477,7 +477,7 @@ function calculateCostAllValues(cost, averagePrice, marketSaturation, building_w
     // vNr函数 f = vNr(be, n, G.marketSaturation, 100, G.averageRetailPrice),
     var vNr_a = Math.min(Math.max(2 - marketSaturation, 0), 2)
     var vNr_s = vNr_a / 2 + 0.5
-    var vNr_l = quality / 12
+    var vNr_l = (modelQuality === '') ? quality / 12 : 0
     var vNr_d = PROFIT_PER_BUILDING_LEVEL * (buildingLevelsNeededPerUnitPerHour * modeledUnitsSoldAnHour + 1) * ((v_RETAIL_ADJUSTMENT = RETAIL_ADJUSTMENT) != null ? v_RETAIL_ADJUSTMENT : 1) * (vNr_a / 2 * (1 + vNr_l * RETAIL_MODELING_QUALITY_WEIGHT)) + ((g_modeledStoreWages = modeledStoreWages) != null ? g_modeledStoreWages : 0)
     var vNr_u = modeledUnitsSoldAnHour * vNr_s
 
