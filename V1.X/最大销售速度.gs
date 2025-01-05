@@ -197,7 +197,7 @@ function calculateSaleSpeed(sheet, realm, sessionid_settings, sessionid) { //计
           var modeledUnitsSoldAnHour = dataValues[j][8]
           var RETAIL_ADJUSTMENT = dataValues[j][9]
 
-          var p = ((workers + admin + material1 + material2 + material3 + material4 + material5 + market) / amount).toFixed(3);
+          var p = ((workers + admin + material1 + material2 + material3 + material4 + material5 + market) / amount);
           var n = building_wages * B2Value / 100;
 
           if (downlimit === -1) { // -1 成本价
@@ -268,10 +268,10 @@ function calculateSaleSpeed(sheet, realm, sessionid_settings, sessionid) { //计
             }
 
             // Jq函数 Jq(A, ie, be, h, G.averageRetailPrice, n, G.marketSaturation, $, 1)
-            var s = (100 * 3600 / Jq_d).toFixed(2)
+            var s = (100 * 3600 / Jq_d)
 
             // 计算公式y
-            var y = (s * sellPrice).toFixed(1);
+            var y = (s * sellPrice);
 
 
 
@@ -282,7 +282,7 @@ function calculateSaleSpeed(sheet, realm, sessionid_settings, sessionid) { //计
             var w = y - underscore;
 
             // // 计算每小时销售/单位
-            var salesPerUnitPerHour = (s * C2Value).toFixed(2);
+            var salesPerUnitPerHour = (s * C2Value);
 
             // // 计算每小时利润
             var profitPerHour = w * C2Value;
@@ -537,10 +537,10 @@ function optionSpeed(optionData, replacedList, dataValues, count, calculatorShee
             }
 
             // Jq函数 Jq(A, ie, be, h, G.averageRetailPrice, n, G.marketSaturation, $, 1)
-            var s = (100 * 3600 / Jq_d).toFixed(2)
+            var s = (100 * 3600 / Jq_d)
 
             // 计算公式y
-            var y = (s * sellPrice).toFixed(1);
+            var y = (s * sellPrice);
 
 
 
@@ -551,7 +551,7 @@ function optionSpeed(optionData, replacedList, dataValues, count, calculatorShee
             var w = y - underscore;
 
             // // 计算每小时销售/单位
-            var salesPerUnitPerHour = (s * C2Value).toFixed(2);
+            var salesPerUnitPerHour = (s * C2Value);
 
             // // 计算每小时利润
             var profitPerHour = w * C2Value;
@@ -587,7 +587,7 @@ function optionSpeed(optionData, replacedList, dataValues, count, calculatorShee
           calculatorSheet.getRange("B" + (count + 9)).setValue("Q" + quality);
 
           //将物品数量放到计算器表中
-          calculatorSheet.getRange("C" + (count + 9)).setValue(1);
+          calculatorSheet.getRange("C" + (count + 9)).setValue(100);
 
           //将物品成本放到计算器表中
           calculatorSheet.getRange("D" + (count + 9)).setValue(p);
@@ -718,10 +718,10 @@ function marketSpeed(marketData, replacedList, dataValues, count, calculatorShee
             }
 
             // Jq函数 Jq(A, ie, be, h, G.averageRetailPrice, n, G.marketSaturation, $, 1)
-            var s = (100 * 3600 / Jq_d).toFixed(2)
+            var s = (100 * 3600 / Jq_d)
 
             // 计算公式y
-            var y = (s * sellPrice).toFixed(1);
+            var y = (s * sellPrice);
 
 
 
@@ -732,7 +732,7 @@ function marketSpeed(marketData, replacedList, dataValues, count, calculatorShee
             var w = y - underscore;
 
             // // 计算每小时销售/单位
-            var salesPerUnitPerHour = (s * C2Value).toFixed(2);
+            var salesPerUnitPerHour = (s * C2Value);
 
             // // 计算每小时利润
             var profitPerHour = w * C2Value;
@@ -768,7 +768,7 @@ function marketSpeed(marketData, replacedList, dataValues, count, calculatorShee
           calculatorSheet.getRange("B" + (count + 9)).setValue("Q" + quality);
 
           //将物品数量放到计算器表中
-          calculatorSheet.getRange("C" + (count + 9)).setValue(1);
+          calculatorSheet.getRange("C" + (count + 9)).setValue(100);
 
           //将物品成本放到计算器表中
           calculatorSheet.getRange("D" + (count + 9)).setValue(p);

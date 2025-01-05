@@ -34,6 +34,26 @@ function getEmployeesByPosition(data, position) {
   return data.filter(function (employee) {
     return employee.position === position;
   }).map(function (employee) {
+    // 检查 position 是否为 coo, cfo, cmo, cto
+    if (['coo', 'cfo', 'cmo', 'cto'].includes(employee.position)) {
+      var startTime = new Date(employee.start);
+      var currentTime = new Date();
+
+      // 计算 start 时间与当前时间的差异（以毫秒为单位）
+      var timeDifference = currentTime - startTime;
+
+      // 检查时间差是否在3小时内（3小时 = 3 * 60 * 60 * 1000 毫秒）
+      if (timeDifference <= 3 * 60 * 60 * 1000 && timeDifference >= 0) {
+        // 将 skills 全部置为0
+        employee.skills = {
+          coo: 0,
+          cfo: 0,
+          cmo: 0,
+          cto: 0
+        };
+      }
+    }
+
     if (employee.currentTraining && employee.currentTraining.description) {
       return {
         "name": employee.name,
@@ -99,6 +119,7 @@ function executives(sessionid, realm) {
   var profitSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(realm + "固定利润算成本");
   var speedSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(realm + "计算器（最大销售速度）");
   var optionSellPriceSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(realm + "自定义售价");
+
 
   // 获取当前表格并清空内容
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(realm + "高管");
@@ -170,6 +191,7 @@ function executives(sessionid, realm) {
   profitSheet.getRange(6, 4).setValue(formattedTime);
   speedSheet.getRange(6, 4).setValue(formattedTime);
   optionSellPriceSheet.getRange(6, 4).setValue(formattedTime);
+
   // 在高管表 A11 单元格设置格式化时间
   sheet.getRange(11, 1).setValue(formattedTime);
 

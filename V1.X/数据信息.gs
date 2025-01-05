@@ -98,7 +98,9 @@ function fetchDataAndInsertToSheet(sessionid, realm, realm_id, customEconomyStat
   // 动态生成rowData1数组 物品id 饱和度 平均价格
   var rowData1 = [];
   var realm_resources_retail_info = "https://www.simcompanies.com/api/v4/" + realm_id + "/resources-retail-info/";
-  var realm_resources_retail_info_response = UrlFetchApp.fetch(realm_resources_retail_info);
+  var timestamp = new Date().getTime(); // 获取毫秒级时间戳
+  var urlWithTimestamp = realm_resources_retail_info + "?timestamp=" + timestamp;
+  var realm_resources_retail_info_response = UrlFetchApp.fetch(urlWithTimestamp);
   var realm_resources_retail_info_data = JSON.parse(realm_resources_retail_info_response.getContentText());
 
   realm_resources_retail_info_data.forEach(function (item) {

@@ -29,6 +29,11 @@ function onEdit3(e) {
 
 function calculateAllValues(sheet, realm, sessionid_settings, sessionid) { //计算最大时利润
 
+  // var sheet = 'R1计算器';
+  // var realm = 'R1'
+  // var sessionid_settings = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("使用说明")
+  // var sessionid = sessionid_settings.getRange("B1").getValue()
+
   if (sessionid != null) {
     if (realm === 'R1') {
       sessionid_settings.getRange(1, 7).setValue(getAdministration_overhead(sessionid))
@@ -46,7 +51,7 @@ function calculateAllValues(sheet, realm, sessionid_settings, sessionid) { //计
   range = calculatorSheet.getRange("A9:J");
   range.clearContent();
 
-  const mapping = {
+  const mapping = { //映射表
     '苹果': 3,
     '橘子': 4,
     '葡萄': 5,
@@ -122,17 +127,18 @@ function calculateAllValues(sheet, realm, sessionid_settings, sessionid) { //计
 
 
   // 获取R1计算器表中的A2,B2,C2单元格的值
-  var A2Value = calculatorSheet.getRange("A2").getValue();
-  var B2Value = calculatorSheet.getRange("B2").getValue();
-  var C2Value = calculatorSheet.getRange("C2").getValue();
+  var A2Value = calculatorSheet.getRange("A2").getValue(); //销售速度
+  var B2Value = calculatorSheet.getRange("B2").getValue(); //管理费用
+  var C2Value = calculatorSheet.getRange("C2").getValue(); //单销售建筑等级
 
-  var PROFIT_PER_BUILDING_LEVEL = calculatorSheet.getRange("H6").getValue();
-  var RETAIL_MODELING_QUALITY_WEIGHT = calculatorSheet.getRange("J6").getValue();
+  var PROFIT_PER_BUILDING_LEVEL = calculatorSheet.getRange("H6").getValue(); //core中的PROFIT_PER_BUILDING_LEVEL
+  var RETAIL_MODELING_QUALITY_WEIGHT = calculatorSheet.getRange("J6").getValue(); //core中的RETAIL_MODELING_QUALITY_WEIGHT
 
-  var acceleration_multiplier = calculatorSheet.getRange("F3").getValue();
-  var upLimit = calculatorSheet.getRange("L1").getValue();
-  var downlimit = calculatorSheet.getRange("L2").getValue();
-  var mpDiscount = calculatorSheet.getRange("U26").getValue();
+  var acceleration_multiplier = calculatorSheet.getRange("F3").getValue(); //新手加速
+  var upLimit = calculatorSheet.getRange("L1").getValue(); //遍历上限
+  var downlimit = calculatorSheet.getRange("L2").getValue(); //遍历下限
+  var saleAmount = calculatorSheet.getRange("K3").getValue(); //销售数量
+  var mpDiscount = calculatorSheet.getRange("U26").getValue(); //mp-?%
 
 
   // 获取选中的物品ID
@@ -159,6 +165,7 @@ function calculateAllValues(sheet, realm, sessionid_settings, sessionid) { //计
   const getChineseItem = (number) => reverseMapping[number];
 
   var count = 0;
+
   // 遍历库存信息表中的每一行
   for (var i = 0; i < inventoryData.length; i++) {
 
@@ -181,10 +188,13 @@ function calculateAllValues(sheet, realm, sessionid_settings, sessionid) { //计
       var maxProfitPerHour = 0; // 最大时利润
       var maxSalesPerUnitPerHour = 0; // 最大时销售速度 
       var optimalSellPrice = 0; // 售价
+      var spendTime = 0; // 销售花费时间
+      var spendStore = 0; // 销售花费商店
+      var totalProfit = 0; // 总利润
 
       // 在数据信息表中查找与当前行匹配的 ID
       for (var j = 0; j < dataValues.length; j++) {
-        
+
         if ((dataValues[j][0] === db_letter && dataValues[j][3] === '') || (dataValues[j][0] === db_letter && dataValues[j][3] === quality)) {
           // 计算公式H
           var averagePrice = dataValues[j][1];
@@ -198,8 +208,7 @@ function calculateAllValues(sheet, realm, sessionid_settings, sessionid) { //计
           var RETAIL_ADJUSTMENT = dataValues[j][9]
 
 
-          var p = ((workers + admin + material1 + material2 + material3 + material4 + material5 + market) / amount).toFixed(3); // 成本
-          var n = building_wages * B2Value / 100;
+          var p = ((workers + admin + material1 + material2 + material3 + material4 + material5 + market) / amount); // 成本
 
           if (downlimit === -1) { // -1 成本价
             if (p - 8 < 0) {
@@ -251,7 +260,7 @@ function calculateAllValues(sheet, realm, sessionid_settings, sessionid) { //计
             var vNr_p = vNr_d - (sellPrice - vNr_h) * (sellPrice - vNr_h) * xNr_a
 
             // wNr函数 wNr(p, be.modeledProductionCostPerUnit, (w = be.modeledStoreWages) != null ? w : 0, G.averageRetailPrice, 100)
-            var sj_f = (100 * ((sellPrice - modeledProductionCostPerUnit) * 3600) - ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0)) / (vNr_p + ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0))
+            var sj_f = (amount * ((sellPrice - modeledProductionCostPerUnit) * 3600) - ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0)) / (vNr_p + ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0))
 
             if (sj_f <= 0) {
               if (sellPrice > averagePrice) {
@@ -266,40 +275,46 @@ function calculateAllValues(sheet, realm, sessionid_settings, sessionid) { //计
               }
               continue;
             } else {
-              var sj_w = sj_f / acceleration_multiplier / 1;
-              var Jq_d = sj_w - sj_w * A2Value / 100
+              var sj_w = sj_f / acceleration_multiplier / C2Value;
+              var Jq_d = sj_w - sj_w * A2Value / 100 //销售总秒数
             }
 
-            // Jq函数 Jq(A, ie, be, h, G.averageRetailPrice, n, G.marketSaturation, $, 1)
-            var s = (100 * 3600 / Jq_d).toFixed(2)
+            // 成本
+            var cogs = amount * p;
 
-            // 计算公式y
-            var y = (s * sellPrice).toFixed(1);
+            // 工资
+            var wagesTotal = Math.ceil(Jq_d * (building_wages * C2Value) * acceleration_multiplier * B2Value / 60 / 60)
 
+            // 收入
+            var revenue = amount * sellPrice
 
+            // 总利润
+            var profit = revenue - wagesTotal - cogs
 
-            // // 计算公式_
-            var underscore = p * s + building_wages + n;
+            // 单建筑每小时销售/单位
+            var salesPerUnitPerHour = (3600 / (Jq_d / amount));
 
-            // // 计算公式w 每级每小时利润
-            var w = y - underscore;
+            // 计算每小时利润
+            var profitPerHour = profit / Jq_d * 3600;
 
-            // // 计算每小时销售/单位
-            var salesPerUnitPerHour = (s * C2Value).toFixed(2);
-
-            // // 计算每小时利润
-            var profitPerHour = w * C2Value;
+            // Logger.log("当前售价：" + sellPrice + "，成本：" + cogs + "，工资：" + wagesTotal + "收入：" + revenue + "，总利润：" + profit + '，profitPerHour:' + profitPerHour + ',salesPerUnitPerHour:' + salesPerUnitPerHour)
 
             // 更新最大值及对应的sellPrice
             if (profitPerHour - maxProfitPerHour > 0) {
               maxProfitPerHour = profitPerHour;
               maxSalesPerUnitPerHour = salesPerUnitPerHour;
               optimalSellPrice = sellPrice;
+              spendTime = Jq_d / 86400; // 销售花费时间
+              spendStore = Math.ceil(Jq_d / (86400 * 2)); // 销售花费商店
+              totalProfit = profit; // 总利润
             }
             // 如果最大利润相同，则比较每单位每小时销售额
             else if (profitPerHour === maxProfitPerHour && salesPerUnitPerHour - maxSalesPerUnitPerHour > 0) {
               maxSalesPerUnitPerHour = salesPerUnitPerHour;
               optimalSellPrice = sellPrice;
+              spendTime = Jq_d / 86400; // 销售花费时间
+              spendStore = Math.ceil(Jq_d / (86400 * 2)); // 销售花费商店
+              totalProfit = profit; // 总利润
             }
 
             // 将 sellPrice 步进
@@ -316,7 +331,7 @@ function calculateAllValues(sheet, realm, sessionid_settings, sessionid) { //计
 
           }
 
-          var [sellTime, costStore] = convertToTime(amount, maxSalesPerUnitPerHour);
+          // var [sellTime, costStore] = convertToTime(amount, maxSalesPerUnitPerHour);
 
           // 将ID放到计算器表中
           calculatorSheet.getRange("A" + (count + 9)).setValue(getChineseItem(db_letter));
@@ -343,22 +358,23 @@ function calculateAllValues(sheet, realm, sessionid_settings, sessionid) { //计
           if (maxProfitPerHour === 0) {
             calculatorSheet.getRange("H" + (count + 9)).setValue(0);
           } else {
-            calculatorSheet.getRange("H" + (count + 9)).setValue(sellTime);
+            calculatorSheet.getRange("H" + (count + 9)).setValue(spendTime).setNumberFormat("[hh]:mm:ss");
           }
+
 
           // 将使用商店数量(48小时)放到计算器表中
           if (maxProfitPerHour === 0) {
             calculatorSheet.getRange("I" + (count + 9)).setValue(0);
           } else {
-            calculatorSheet.getRange("I" + (count + 9)).setValue(costStore);
+            calculatorSheet.getRange("I" + (count + 9)).setValue(spendStore);
           }
 
           // 将单品总利润放到计算器表中
           if (maxProfitPerHour === 0) {
             calculatorSheet.getRange("J" + (count + 9)).setValue(0);
           } else {
-            var singleGoodTotalProfit = (maxProfitPerHour / maxSalesPerUnitPerHour) * amount;
-            calculatorSheet.getRange("J" + (count + 9)).setValue(singleGoodTotalProfit);
+
+            calculatorSheet.getRange("J" + (count + 9)).setValue(totalProfit);
           }
 
           count++;
@@ -374,7 +390,7 @@ function calculateAllValues(sheet, realm, sessionid_settings, sessionid) { //计
 
   var optionButton = calculatorSheet.getRange("E5").getValue();
   if (optionButton) {
-    count = optionAllValues(optionData, replacedList, dataValues, count, calculatorSheet, A2Value, B2Value, C2Value, getChineseItem, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, upLimit, downlimit);
+    count = optionAllValues(optionData, replacedList, dataValues, count, calculatorSheet, A2Value, B2Value, C2Value, getChineseItem, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, upLimit, downlimit, saleAmount);
   }
 
   var marketButton = calculatorSheet.getRange("F5").getValue();
@@ -387,7 +403,7 @@ function calculateAllValues(sheet, realm, sessionid_settings, sessionid) { //计
     // 获取市场价格信息
     var marketRange = calculatorSheet.getRange("R27:T" + calculatorSheet.getLastRow());
     var marketData = marketRange.getValues();
-    marketAllValues(marketData, replacedList, dataValues, count, calculatorSheet, A2Value, B2Value, C2Value, getChineseItem, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, upLimit, downlimit, mpDiscount);
+    marketAllValues(marketData, replacedList, dataValues, count, calculatorSheet, A2Value, B2Value, C2Value, getChineseItem, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, upLimit, downlimit, mpDiscount, saleAmount);
   }
 
 
@@ -416,27 +432,27 @@ function calculateAllValues(sheet, realm, sessionid_settings, sessionid) { //计
 }
 
 
-function convertToTime(amount, maxSalesPerUnitPerHour) { // 返回销售时间(时:分)， 使用商店数量(48小时)
-  // 计算总的销售时间（小时）
-  var sellTimeHours = amount / maxSalesPerUnitPerHour;
+// function convertToTime(amount, maxSalesPerUnitPerHour) { // 返回销售时间(时:分)， 使用商店数量(48小时)
+//   // 计算总的销售时间（小时）
+//   var sellTimeHours = amount / maxSalesPerUnitPerHour;
 
-  // 将小时转换为分钟
-  var sellTimeMinutes = sellTimeHours * 60;
+//   // 将小时转换为分钟
+//   var sellTimeMinutes = sellTimeHours * 60;
 
-  // 分别获取小时和分钟部分
-  var hours = Math.floor(sellTimeMinutes / 60);
-  var minutes = Math.ceil(sellTimeMinutes % 60);
+//   // 分别获取小时和分钟部分
+//   var hours = Math.floor(sellTimeMinutes / 60);
+//   var minutes = Math.ceil(sellTimeMinutes % 60);
 
-  // 格式化成时:分的样式
-  var formattedTime = hours.toString() + ':' + minutes.toString().padStart(2, '0');
+//   // 格式化成时:分的样式
+//   var formattedTime = hours.toString() + ':' + minutes.toString().padStart(2, '0');
 
-  var costStore = Math.ceil(Math.ceil(sellTimeHours) / 48);
+//   var costStore = Math.ceil(Math.ceil(sellTimeHours) / 48);
 
-  return [formattedTime, costStore];
-}
+//   return [formattedTime, costStore];
+// }
 
 
-function optionAllValues(optionData, replacedList, dataValues, count, calculatorSheet, A2Value, B2Value, C2Value, getChineseItem, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, upLimit, downlimit) {
+function optionAllValues(optionData, replacedList, dataValues, count, calculatorSheet, A2Value, B2Value, C2Value, getChineseItem, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, upLimit, downlimit, saleAmount) {
 
   count++;
 
@@ -450,9 +466,12 @@ function optionAllValues(optionData, replacedList, dataValues, count, calculator
       var market = optionData[i][2]; // 获取采购和退货
 
 
-      var maxProfitPerHour = 0;
-      var maxSalesPerUnitPerHour = 0;
-      var optimalSellPrice = 0;
+      var maxProfitPerHour = 0; // 最大时利润
+      var maxSalesPerUnitPerHour = 0; // 最大时销售速度 
+      var optimalSellPrice = 0; // 售价
+      var spendTime = 0; // 销售花费时间
+      var spendStore = 0; // 销售花费商店
+      var totalProfit = 0; // 总利润
 
       // 在数据信息表中查找与当前行匹配的 ID
       for (var j = 0; j < dataValues.length; j++) {
@@ -470,7 +489,6 @@ function optionAllValues(optionData, replacedList, dataValues, count, calculator
 
 
           var p = market;
-          var n = building_wages * B2Value / 100;
 
           if (downlimit === -1) { // -1 成本价
             if (p - 8 < 0) {
@@ -522,7 +540,7 @@ function optionAllValues(optionData, replacedList, dataValues, count, calculator
             var vNr_p = vNr_d - (sellPrice - vNr_h) * (sellPrice - vNr_h) * xNr_a
 
             // wNr函数 wNr(p, be.modeledProductionCostPerUnit, (w = be.modeledStoreWages) != null ? w : 0, G.averageRetailPrice, 100)
-            var sj_f = (100 * ((sellPrice - modeledProductionCostPerUnit) * 3600) - ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0)) / (vNr_p + ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0))
+            var sj_f = (saleAmount * ((sellPrice - modeledProductionCostPerUnit) * 3600) - ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0)) / (vNr_p + ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0))
 
             if (sj_f <= 0) {
               if (sellPrice > averagePrice) {
@@ -537,40 +555,46 @@ function optionAllValues(optionData, replacedList, dataValues, count, calculator
               }
               continue;
             } else {
-              var sj_w = sj_f / acceleration_multiplier / 1;
-              var Jq_d = sj_w - sj_w * A2Value / 100
+              var sj_w = sj_f / acceleration_multiplier / C2Value;
+              var Jq_d = sj_w - sj_w * A2Value / 100 //销售总秒数
             }
 
-            // Jq函数 Jq(A, ie, be, h, G.averageRetailPrice, n, G.marketSaturation, $, 1)
-            var s = (100 * 3600 / Jq_d).toFixed(2)
+            // 成本
+            var cogs = saleAmount * p;
 
-            // 计算公式y
-            var y = (s * sellPrice).toFixed(1);
+            // 工资
+            var wagesTotal = Math.ceil(Jq_d * (building_wages * C2Value) * acceleration_multiplier * B2Value / 60 / 60)
 
+            // 收入
+            var revenue = saleAmount * sellPrice
 
+            // 总利润
+            var profit = revenue - wagesTotal - cogs
 
-            // // 计算公式_
-            var underscore = p * s + building_wages + n;
+            // 单建筑每小时销售/单位
+            var salesPerUnitPerHour = (3600 / (Jq_d / saleAmount));
 
-            // // 计算公式w 每级每小时利润
-            var w = y - underscore;
-          
-            // // 计算每小时销售/单位
-            var salesPerUnitPerHour = (s * C2Value).toFixed(2);
+            // 计算每小时利润
+            var profitPerHour = profit / Jq_d * 3600;
 
-            // // 计算每小时利润
-            var profitPerHour = w * C2Value;
+            // Logger.log("当前售价：" + sellPrice + "，成本：" + cogs + "，工资：" + wagesTotal + "收入：" + revenue + "，总利润：" + profit + '，profitPerHour:' + profitPerHour + ',salesPerUnitPerHour:' + salesPerUnitPerHour)
 
             // 更新最大值及对应的sellPrice
             if (profitPerHour - maxProfitPerHour > 0) {
               maxProfitPerHour = profitPerHour;
               maxSalesPerUnitPerHour = salesPerUnitPerHour;
               optimalSellPrice = sellPrice;
+              spendTime = Jq_d / 86400; // 销售花费时间
+              spendStore = Math.ceil(Jq_d / (86400 * 2)); // 销售花费商店
+              totalProfit = profit; // 总利润
             }
             // 如果最大利润相同，则比较每单位每小时销售额
             else if (profitPerHour === maxProfitPerHour && salesPerUnitPerHour - maxSalesPerUnitPerHour > 0) {
               maxSalesPerUnitPerHour = salesPerUnitPerHour;
               optimalSellPrice = sellPrice;
+              spendTime = Jq_d / 86400; // 销售花费时间
+              spendStore = Math.ceil(Jq_d / (86400 * 2)); // 销售花费商店
+              totalProfit = profit; // 总利润
             }
 
             // 将 sellPrice 步进
@@ -582,7 +606,7 @@ function optionAllValues(optionData, replacedList, dataValues, count, calculator
               sellPrice = parseFloat((sellPrice + 1).toFixed(0));
             }
 
-             
+
           }
 
           // 将ID放到计算器表中
@@ -592,7 +616,7 @@ function optionAllValues(optionData, replacedList, dataValues, count, calculator
           calculatorSheet.getRange("B" + (count + 9)).setValue("Q" + quality);
 
           //将物品数量放到计算器表中
-          calculatorSheet.getRange("C" + (count + 9)).setValue(1);
+          calculatorSheet.getRange("C" + (count + 9)).setValue(saleAmount);
 
           //将物品成本放到计算器表中
           calculatorSheet.getRange("D" + (count + 9)).setValue(p);
@@ -605,6 +629,29 @@ function optionAllValues(optionData, replacedList, dataValues, count, calculator
 
           // 将每小时利润放到计算器表中
           calculatorSheet.getRange("G" + (count + 9)).setValue(maxProfitPerHour);
+
+          // 将销售时间放到计算器表中
+          if (maxProfitPerHour === 0) {
+            calculatorSheet.getRange("H" + (count + 9)).setValue(0);
+          } else {
+            calculatorSheet.getRange("H" + (count + 9)).setValue(spendTime).setNumberFormat("[hh]:mm:ss");
+          }
+
+
+          // 将使用商店数量(48小时)放到计算器表中
+          if (maxProfitPerHour === 0) {
+            calculatorSheet.getRange("I" + (count + 9)).setValue(0);
+          } else {
+            calculatorSheet.getRange("I" + (count + 9)).setValue(spendStore);
+          }
+
+          // 将单品总利润放到计算器表中
+          if (maxProfitPerHour === 0) {
+            calculatorSheet.getRange("J" + (count + 9)).setValue(0);
+          } else {
+
+            calculatorSheet.getRange("J" + (count + 9)).setValue(totalProfit);
+          }
 
           count++;
 
@@ -620,7 +667,7 @@ function optionAllValues(optionData, replacedList, dataValues, count, calculator
 }
 
 
-function marketAllValues(marketData, replacedList, dataValues, count, calculatorSheet, A2Value, B2Value, C2Value, getChineseItem, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, upLimit, downlimit, mpDiscount) {
+function marketAllValues(marketData, replacedList, dataValues, count, calculatorSheet, A2Value, B2Value, C2Value, getChineseItem, PROFIT_PER_BUILDING_LEVEL, RETAIL_MODELING_QUALITY_WEIGHT, acceleration_multiplier, upLimit, downlimit, mpDiscount, saleAmount) {
 
   count++;
 
@@ -653,7 +700,7 @@ function marketAllValues(marketData, replacedList, dataValues, count, calculator
           var RETAIL_ADJUSTMENT = dataValues[j][9]
 
           var p = market;
-          var n = building_wages * B2Value / 100;
+
 
           if (downlimit === -1) { // -1 成本价
             if (p - 8 < 0) {
@@ -704,7 +751,7 @@ function marketAllValues(marketData, replacedList, dataValues, count, calculator
             var vNr_p = vNr_d - (sellPrice - vNr_h) * (sellPrice - vNr_h) * xNr_a
 
             // wNr函数 wNr(p, be.modeledProductionCostPerUnit, (w = be.modeledStoreWages) != null ? w : 0, G.averageRetailPrice, 100)
-            var sj_f = (100 * ((sellPrice - modeledProductionCostPerUnit) * 3600) - ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0)) / (vNr_p + ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0))
+            var sj_f = (saleAmount * ((sellPrice - modeledProductionCostPerUnit) * 3600) - ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0)) / (vNr_p + ((w_modeledStoreWages = modeledStoreWages) != null ? w_modeledStoreWages : 0))
 
             if (sj_f <= 0) {
               if (sellPrice > averagePrice) {
@@ -719,40 +766,44 @@ function marketAllValues(marketData, replacedList, dataValues, count, calculator
               }
               continue;
             } else {
-              var sj_w = sj_f / acceleration_multiplier / 1;
-              var Jq_d = sj_w - sj_w * A2Value / 100
+              var sj_w = sj_f / acceleration_multiplier / C2Value;
+              var Jq_d = sj_w - sj_w * A2Value / 100 //销售总秒数
             }
 
-            // Jq函数 Jq(A, ie, be, h, G.averageRetailPrice, n, G.marketSaturation, $, 1)
-            var s = (100 * 3600 / Jq_d).toFixed(2)
+            // 成本
+            var cogs = saleAmount * p;
 
-            // 计算公式y
-            var y = (s * sellPrice).toFixed(1);
+            // 工资
+            var wagesTotal = Math.ceil(Jq_d * (building_wages * C2Value) * acceleration_multiplier * B2Value / 60 / 60)
 
+            // 收入
+            var revenue = saleAmount * sellPrice
 
+            // 总利润
+            var profit = revenue - wagesTotal - cogs
 
-            // // 计算公式_
-            var underscore = p * s + building_wages + n;
+            // 单建筑每小时销售/单位
+            var salesPerUnitPerHour = (3600 / (Jq_d / saleAmount));
 
-            // // 计算公式w 每级每小时利润
-            var w = y - underscore;
-
-            // // 计算每小时销售/单位
-            var salesPerUnitPerHour = (s * C2Value).toFixed(2);
-
-            // // 计算每小时利润
-            var profitPerHour = w * C2Value;
+            // 计算每小时利润
+            var profitPerHour = profit / Jq_d * 3600;
 
             // 更新最大值及对应的sellPrice
             if (profitPerHour - maxProfitPerHour > 0) {
               maxProfitPerHour = profitPerHour;
               maxSalesPerUnitPerHour = salesPerUnitPerHour;
               optimalSellPrice = sellPrice;
+              spendTime = Jq_d / 86400; // 销售花费时间
+              spendStore = Math.ceil(Jq_d / (86400 * 2)); // 销售花费商店
+              totalProfit = profit; // 总利润
             }
             // 如果最大利润相同，则比较每单位每小时销售额
             else if (profitPerHour === maxProfitPerHour && salesPerUnitPerHour - maxSalesPerUnitPerHour > 0) {
               maxSalesPerUnitPerHour = salesPerUnitPerHour;
               optimalSellPrice = sellPrice;
+              spendTime = Jq_d / 86400; // 销售花费时间
+              spendStore = Math.ceil(Jq_d / (86400 * 2)); // 销售花费商店
+              totalProfit = profit; // 总利润
             }
 
             // 将 sellPrice 步进
@@ -774,7 +825,7 @@ function marketAllValues(marketData, replacedList, dataValues, count, calculator
           calculatorSheet.getRange("B" + (count + 9)).setValue("Q" + quality);
 
           //将物品数量放到计算器表中
-          calculatorSheet.getRange("C" + (count + 9)).setValue(1);
+          calculatorSheet.getRange("C" + (count + 9)).setValue(saleAmount);
 
           //将物品成本放到计算器表中
           calculatorSheet.getRange("D" + (count + 9)).setValue(p);
@@ -787,6 +838,29 @@ function marketAllValues(marketData, replacedList, dataValues, count, calculator
 
           // 将每小时利润放到计算器表中
           calculatorSheet.getRange("G" + (count + 9)).setValue(maxProfitPerHour);
+
+          // 将销售时间放到计算器表中
+          if (maxProfitPerHour === 0) {
+            calculatorSheet.getRange("H" + (count + 9)).setValue(0);
+          } else {
+            calculatorSheet.getRange("H" + (count + 9)).setValue(spendTime).setNumberFormat("[hh]:mm:ss");
+          }
+
+
+          // 将使用商店数量(48小时)放到计算器表中
+          if (maxProfitPerHour === 0) {
+            calculatorSheet.getRange("I" + (count + 9)).setValue(0);
+          } else {
+            calculatorSheet.getRange("I" + (count + 9)).setValue(spendStore);
+          }
+
+          // 将单品总利润放到计算器表中
+          if (maxProfitPerHour === 0) {
+            calculatorSheet.getRange("J" + (count + 9)).setValue(0);
+          } else {
+
+            calculatorSheet.getRange("J" + (count + 9)).setValue(totalProfit);
+          }
 
           count++;
 
