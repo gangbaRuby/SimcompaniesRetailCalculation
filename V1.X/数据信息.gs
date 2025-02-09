@@ -464,7 +464,7 @@ function extractVariableValue(jsContent, variableName) {
   if (!variableName) return null;
 
   // 使用正则表达式查找变量赋值
-  var regex = new RegExp(variableName + '\\s*=\\s*([^,]+),');
+  var regex = new RegExp(variableName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*=\\s*([^,]+),');
   var match = jsContent.match(regex);
   return match ? match[1] : null;
 }
