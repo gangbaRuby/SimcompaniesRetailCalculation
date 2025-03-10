@@ -124,7 +124,7 @@ function fetchDataAndInsertToSheet(sessionid, realm, realm_id, customEconomyStat
   // 动态生成rowData3数组
   var rowData3 = downloadAndExtractData(realm_id, economyState, calculatorSheet, profitSheet, speedSheet, optionSellPriceSheet, defaultObject);
 
-
+  // Logger.log('rowData3' + rowData3)
 
 
 
@@ -136,6 +136,10 @@ function fetchDataAndInsertToSheet(sessionid, realm, realm_id, customEconomyStat
 
     // 根据 ID 查找 `rowData3` 中的数据
     let matchingData = rowData3[updatedData1_id];
+
+    // Logger.log('updatedData1_id:' + updatedData1_id)
+    // Logger.log('updatedData1_quality' + updatedData1_quality)
+
 
     if (updatedData1_quality == null) {
       if (matchingData) {
@@ -273,7 +277,7 @@ function get_economyState(sessionid) { //获取周期
   var temporals = data.temporals;
   if (temporals && temporals.hasOwnProperty('economyState')) {
     var economyState = temporals.economyState;
-    Logger.log('Economy State: ' + economyState);
+    // Logger.log('Economy State: ' + economyState);
 
     // 你可以根据需要将 economyState 存储到工作表或执行其他操作
     return economyState;
@@ -287,23 +291,21 @@ function get_economyState(sessionid) { //获取周期
 function downloadAndExtractData(realm_id, economyState, calculatorSheet, profitSheet, speedSheet, optionSellPriceSheet, defaultObject) {
   var url = fetchScriptUrl();
   var response = UrlFetchApp.fetch(url);
-  var content = response.getContentText();
-
+  var content = response.getContentText(); // JS文件字符串
+  //Logger.log(content)
   var values = extractValuesFromJS(content, defaultObject);
 
 
-  // 使用正则表达式提取所需内容
-  var jsonDataString = extractJsonString(content);
+  // 直接根据周期取新零售模型数据
+  var jsonDataString = extractJsonString(content, economyState);
+  // Logger.log('jsonDataString:' + jsonDataString)
+
 
   if (jsonDataString) {
     try {
-      // 将提取的字符串转换为有效的 JSON 格式
-      jsonDataString = convertToValidJson(jsonDataString);
-      // Logger.log("转换后的 JSON 字符串: " + jsonDataString); // 调试日志
-      var jsonData = JSON.parse(jsonDataString);
 
       // 导出数据 Google Sheet
-      var extractedData = extractData(jsonData, realm_id, economyState);
+      var extractedData = extractData(jsonDataString, realm_id, economyState);
 
       extractedData.PROFIT_PER_BUILDING_LEVEL = values.PROFIT_PER_BUILDING_LEVEL;
       extractedData.RETAIL_MODELING_QUALITY_WEIGHT = values.RETAIL_MODELING_QUALITY_WEIGHT;
@@ -329,83 +331,65 @@ function downloadAndExtractData(realm_id, economyState, calculatorSheet, profitS
       Logger.log("JSON 解析错误: " + e.message);
     }
   } else {
-    Logger.log("无法找到有效的 JSON 数据。");
+    Logger.log("无法找到有效的 新零售JSON 数据。");
   }
 
 
 
 }
 
-function extractJsonString(content) {
-  // 使用正则表达式查找以 "{0:{1:{buildingLevelsNeededPerUnitPerHour:" 开头，以 "}}}" 结尾的内容
-  var jsonStringMatch = content.match(/\{0:\{1:\{buildingLevelsNeededPerUnitPerHour:[\s\S]*?\}\}\}\}\}/);
+function extractJsonString(content, economyState) {
 
-  return jsonStringMatch ? jsonStringMatch[0] : null;
-}
+  if (economyState === 0) {
+    var jsonStringMatch = content.match(/0:\s*JSON\.parse\('([\s\S]*?)'\)/);
+  } else if (economyState === 1) {
+    var jsonStringMatch = content.match(/1:\s*JSON\.parse\('([\s\S]*?)'\)/);
+  } else if (economyState === 2) {
+    var jsonStringMatch = content.match(/2:\s*JSON\.parse\('([\s\S]*?)'\)/);
+  }
 
-function convertToValidJson(jsonDataString) {
-  // 替换属性名的引号
-  jsonDataString = jsonDataString.replace(/([{,])(\s*)(\w+)(\s*):/g, '$1"$3":');
-
-  // 替换以小数点开头的数字
-  jsonDataString = jsonDataString.replace(/:\s*\.(\d+)/g, ': 0.$1');
-
-
-
-  // 设置每次输出的字符限制
-  // var chunkSize = 1000; // 可以根据需要调整这个大小
-  // for (var i = 0; i < jsonDataString.length; i += chunkSize) {
-  //   Logger.log(jsonDataString.slice(i, i + chunkSize));
-  // }
-
-  return jsonDataString;
+  return jsonStringMatch ? jsonStringMatch[1] : null;
 }
 
 function extractData(data, realm_id, economyState) { //提取四个模型参数
 
   var rowData3 = [];
 
-  if (data.hasOwnProperty(economyState)) {
-    var economyData = data[economyState];
+// 解析 JSON 字符串
+var parsedData = JSON.parse(data); 
 
-    // 遍历 economyData 下的所有 ID
-    for (var id in economyData) {
+for (var id in parsedData) {
+    var modelData = parsedData[id]; // 直接访问解析后的对象
 
-      var economyData = data[economyState];
+    // 检查是否存在 quality 属性
+    var quality = modelData.hasOwnProperty('quality') ? modelData.quality : null;
 
-      // 遍历 economyData 下的所有 ID
-      for (var id in economyData) {
-        var modelData = economyData[id];
-
-        // 检查是否存在 quality 属性
-        var quality = modelData.hasOwnProperty('quality') ? modelData.quality : null;
-
-        if (quality) {
-          // 如果 quality 存在，遍历 quality 数组
-          rowData3[id] = []; // 初始化该 ID 对应的数组
-          for (var qIndex in quality) {
+    if (quality) {
+        // 如果 quality 存在，遍历 quality 数组
+        rowData3[id] = []; // 初始化该 ID 对应的数组
+        for (var qIndex in quality) {
             var qData = quality[qIndex];
 
             // 将 quality 下的数据存储到数组中
             rowData3[id].push([
-              qData.buildingLevelsNeededPerUnitPerHour,
-              qData.modeledProductionCostPerUnit,
-              qData.modeledStoreWages,
-              qData.modeledUnitsSoldAnHour
+                qData.buildingLevelsNeededPerUnitPerHour,
+                qData.modeledProductionCostPerUnit,
+                qData.modeledStoreWages,
+                qData.modeledUnitsSoldAnHour
             ]);
-          }
-        } else {
-          // 如果没有 quality，使用原始 modelData 的数据
-          rowData3[id] = [
+        }
+    } else {
+        // 如果没有 quality，使用原始 modelData 的数据
+        rowData3[id] = [
             modelData.buildingLevelsNeededPerUnitPerHour,
             modelData.modeledProductionCostPerUnit,
             modelData.modeledStoreWages,
             modelData.modeledUnitsSoldAnHour
-          ];
-        }
-      }
+        ];
     }
-  }
+}
+
+
 
   return rowData3;
 }
@@ -432,17 +416,19 @@ function fetchScriptUrl() { //获取js文件
 function extractValuesFromJS(jsContent, defaultObject) {
   // 提取变量名
   var profitVarName = extractVariableName(jsContent, 'PROFIT_PER_BUILDING_LEVEL');
+  // Logger.log(profitVarName)
   var retailVarName = extractVariableName(jsContent, 'RETAIL_MODELING_QUALITY_WEIGHT');
   var adjustmentName = extractVariableName(jsContent, 'RETAIL_ADJUSTMENT');
 
 
   // 获取变量值
   var profitValue = extractVariableValue(jsContent, profitVarName);
+  // Logger.log(profitValue)
   var retailValue = extractVariableValue(jsContent, retailVarName);
 
   // 获取 RETAIL_ADJUSTMENT 对象中的数值数组
   var adjustmentValue = extractadjustmentValue(jsContent, adjustmentName);
-  Logger.log(adjustmentValue)
+  // Logger.log(adjustmentValue)
 
   updateObjectWithAdjustment(defaultObject, adjustmentValue);
 
@@ -464,7 +450,7 @@ function extractVariableValue(jsContent, variableName) {
   if (!variableName) return null;
 
   // 使用正则表达式查找变量赋值
-  var regex = new RegExp(variableName + '\\s*=\\s*([^,]+),');
+  var regex = new RegExp(variableName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*=\\s*([^,]+),');
   var match = jsContent.match(regex);
   return match ? match[1] : null;
 }

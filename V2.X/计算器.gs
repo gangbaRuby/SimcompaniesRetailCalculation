@@ -297,7 +297,7 @@ function calculateAllValues(sheet, realm, sessionid_settings, sessionid) { //计
             // 计算每小时利润
             var profitPerHour = profit / Jq_d * 3600;
 
-            // Logger.log("当前售价：" + sellPrice + "，成本：" + cogs + "，工资：" + wagesTotal + "收入：" + revenue + "，总利润：" + profit + '，profitPerHour:' + profitPerHour + ',salesPerUnitPerHour:' + salesPerUnitPerHour)
+            //  Logger.log("当前售价：" + sellPrice + "，成本：" + cogs + "，工资：" + wagesTotal + "收入：" + revenue + "，总利润：" + profit + '，profitPerHour:' + profitPerHour + ',salesPerUnitPerHour:' + salesPerUnitPerHour)
 
             // 更新最大值及对应的sellPrice
             if (profitPerHour - maxProfitPerHour > 0) {
@@ -326,7 +326,7 @@ function calculateAllValues(sheet, realm, sessionid_settings, sessionid) { //计
               sellPrice = parseFloat((sellPrice + 1).toFixed(0));
             }
 
-            // Logger.log('maxProfitPerHour:'+maxProfitPerHour+',maxSalesPerUnitPerHour:'+maxSalesPerUnitPerHour)
+            //  Logger.log('maxProfitPerHour:'+maxProfitPerHour+',maxSalesPerUnitPerHour:'+maxSalesPerUnitPerHour)
 
 
           }
