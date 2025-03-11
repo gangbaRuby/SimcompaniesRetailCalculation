@@ -29,7 +29,7 @@ function onEdit2(e) {
 
 
 function fetchDataWithCookies(sessionid, realm) {// 获取库存
-  var me_url = "https://www.simcompanies.com/api/v2/companies/me/";
+  var me_url = "https://www.simcompanies.com/api/v3/companies/auth-data/";
   
 
   // 设置 cookies

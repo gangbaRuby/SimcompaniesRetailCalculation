@@ -253,7 +253,7 @@ function fetchDataAndInsertToSheet(sessionid, realm, realm_id, customEconomyStat
 
 
 function get_economyState(sessionid) { //获取周期
-  var url = "https://www.simcompanies.com/api/v2/companies/me/";
+  var url = "https://www.simcompanies.com/api/v3/companies/auth-data/";
 
   // 设置 cookies
   var cookies = {
