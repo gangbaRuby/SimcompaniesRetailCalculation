@@ -43,7 +43,7 @@ function get_price(sheet, realm) {
     }
   }
   Logger.log(output)
-const mapping = {
+  const mapping = {
     '苹果': 3,
     '橘子': 4,
     '葡萄': 5,
@@ -92,7 +92,9 @@ const mapping = {
     '南瓜': 146,
     '杰克灯笼': 147,
     '女巫服': 148,
-    '树': 150
+    '树': 150,
+    'easter-bunny': 151,
+    'ramadan-sweets': 152
   };
   const replacedList = output.map(item => mapping[item]);
 

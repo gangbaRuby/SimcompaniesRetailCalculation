@@ -22,8 +22,8 @@ function onCheckboxClick(e) {
       checkboxesToSync = [sheet.getRange('O6:V6')];
     } else if (checkbox.getA1Notation() === 'N9') { // 生鲜商店
       checkboxesToSync = [
-        sheet.getRange('O8:U8'),
-        sheet.getRange('O10:U10')
+        sheet.getRange('O8:v8'),
+        sheet.getRange('O10:v10')
       ];
     } else if (checkbox.getA1Notation() === 'N12') { // 电子产品商店
       checkboxesToSync = [sheet.getRange('O12:T12')];

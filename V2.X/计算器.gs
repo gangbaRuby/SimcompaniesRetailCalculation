@@ -51,7 +51,7 @@ function calculateAllValues(sheet, realm, sessionid_settings, sessionid) { //计
   range = calculatorSheet.getRange("A9:J");
   range.clearContent();
 
-  const mapping = { //映射表
+  const mapping = {
     '苹果': 3,
     '橘子': 4,
     '葡萄': 5,
@@ -100,7 +100,9 @@ function calculateAllValues(sheet, realm, sessionid_settings, sessionid) { //计
     '南瓜': 146,
     '杰克灯笼': 147,
     '女巫服': 148,
-    '树': 150
+    '树': 150,
+    'easter-bunny': 151,
+    'ramadan-sweets': 152
   };
 
 

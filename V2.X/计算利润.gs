@@ -133,7 +133,9 @@ function calculateOptimalCosts(sheet, realm, sessionid_settings, sessionid) { //
     '南瓜': 146,
     '杰克灯笼': 147,
     '女巫服': 148,
-    '树': 150
+    '树': 150,
+    'easter-bunny': 151,
+    'ramadan-sweets': 152
   };
   const replacedList = output.map(item => mapping[item]); //汉字转ID
 
