@@ -441,7 +441,7 @@ function extractValuesFromJS(jsContent, defaultObject) {
 
 function extractVariableName(jsContent, key) {
   // 使用正则表达式查找以 key 为值的变量赋值语句
-  var regex = new RegExp(key + '\\s*:\\s*([\\w$]+)');
+  var regex = new RegExp('\\b' + key + '\\s*:\\s*([\\w$]+)');
   var match = jsContent.match(regex);
   return match ? match[1] : null;
 }
@@ -450,7 +450,7 @@ function extractVariableValue(jsContent, variableName) {
   if (!variableName) return null;
 
   // 使用正则表达式查找变量赋值
-  var regex = new RegExp(variableName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*=\\s*([^,]+),');
+  var regex = new RegExp('\\b' + variableName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*=\\s*([^,]+),');
   var match = jsContent.match(regex);
   return match ? match[1] : null;
 }
@@ -459,7 +459,7 @@ function extractadjustmentValue(jsContent, variableName) {
   if (!variableName) return null;
 
   // 使用正则表达式查找变量赋值
-  var regex = new RegExp(variableName + '\\s*=\\s*(\\{[^}]*\\})');
+  var regex = new RegExp('\\b' + variableName + '\\s*=\\s*(\\{[^}]*\\})');
   var match = jsContent.match(regex);
 
   // 如果找到匹配的字符串
