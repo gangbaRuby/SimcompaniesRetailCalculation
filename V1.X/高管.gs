@@ -27,54 +27,42 @@ function onEdit4(e) {
   }
 }
 
-
+const positionMap = {
+  "coo": "o",
+  "cfo": "f",
+  "cmo": "m",
+  "cto": "t",
+  "1": "1",
+  "2": "2",
+  "3": "3",
+  "4": "4",
+  "5": "5"
+};
 
 // 根据职位过滤员工信息并转换格式
-function getEmployeesByPosition(data, position) {
+function getEmployeesByPosition(data, positionKey) {
+  const positionCode = positionMap[positionKey];
   return data.filter(function (employee) {
-    return employee.position === position;
+    return employee.currentWorkHistory?.position === positionCode;
   }).map(function (employee) {
-    // 检查 position 是否为 coo, cfo, cmo, cto
-    if (['coo', 'cfo', 'cmo', 'cto'].includes(employee.position)) {
-      var startTime = new Date(employee.start);
-      var currentTime = new Date();
+    var startTime = new Date(employee.currentWorkHistory.start);
+    var currentTime = new Date();
+    var timeDifference = currentTime - startTime;
 
-      // 计算 start 时间与当前时间的差异（以毫秒为单位）
-      var timeDifference = currentTime - startTime;
+    var isNewlyAssigned = timeDifference <= 3 * 60 * 60 * 1000 && timeDifference >= 0;
+    var isTrainingActive = employee.currentTraining;
+    var isStrikeOver = !employee.strikeUntil;
+    var resetSkills = isNewlyAssigned || isTrainingActive || !isStrikeOver;
 
-      // 检查时间差是否在3小时内（3小时 = 3 * 60 * 60 * 1000 毫秒）
-      if (timeDifference <= 3 * 60 * 60 * 1000 && timeDifference >= 0) {
-        // 将 skills 全部置为0
-        employee.skills = {
-          coo: 0,
-          cfo: 0,
-          cmo: 0,
-          cto: 0
-        };
-      }
-    }
-
-    if (employee.currentTraining && employee.currentTraining.description) {
-      return {
-        "name": employee.name,
-        "age": employee.age,
-        "salary": employee.salary,
-        "coo": 0,
-        "cfo": 0,
-        "cmo": 0,
-        "cto": 0
-      };
-    } else {
-      return {
-        "name": employee.name,
-        "age": employee.age,
-        "salary": employee.salary,
-        "coo": employee.skills?.coo,
-        "cfo": employee.skills?.cfo,
-        "cmo": employee.skills?.cmo,
-        "cto": employee.skills?.cto
-      };
-    }
+    return {
+      "name": employee.name,
+      "age": employee.age,
+      "salary": employee.salary,
+      "coo": resetSkills ? 0 : (employee.skills?.coo || 0),
+      "cfo": resetSkills ? 0 : (employee.skills?.cfo || 0),
+      "cmo": resetSkills ? 0 : (employee.skills?.cmo || 0),
+      "cto": resetSkills ? 0 : (employee.skills?.cto || 0)
+    };
   });
 }
 
@@ -92,7 +80,7 @@ function fillEmployeesToSheet(sheet, employees, startRow, startColumn) {
 // 主要功能函数
 function executives(sessionid, realm) {
   // 发送请求获取员工信息
-  var url = "https://www.simcompanies.com/api/v2/companies/me/executives/";
+  var url = "https://www.simcompanies.com/api/v3/companies/me/executives/";
   var cookies = {
     "sessionid": sessionid
   };
@@ -105,12 +93,13 @@ function executives(sessionid, realm) {
   };
   var response = UrlFetchApp.fetch(url, options);
   var data = JSON.parse(response.getContentText());
+  var executives = data.executives;  // 从data里取executives数组
 
   // 获取不同职位的员工信息
-  var coo = getEmployeesByPosition(data, "coo");
-  var cfo = getEmployeesByPosition(data, "cfo");
-  var cmo = getEmployeesByPosition(data, "cmo");
-  var cto = getEmployeesByPosition(data, "cto");
+  var coo = getEmployeesByPosition(executives, "coo");
+  var cfo = getEmployeesByPosition(executives, "cfo");
+  var cmo = getEmployeesByPosition(executives, "cmo");
+  var cto = getEmployeesByPosition(executives, "cto");
 
   // 存储不同位置的员工信息
   var gEmployees = {};
@@ -136,11 +125,11 @@ function executives(sessionid, realm) {
 
   // 填入其他位置的员工信息
   for (var i = 1; i <= 5; i++) {
-    var position = "g" + i;
-    var employees = getEmployeesByPosition(data, position);
+    var position = i;
+    var employees = getEmployeesByPosition(executives, position);
 
     if (employees.length === 0) {
-      break;
+      continue;
     }
 
     gEmployees[position] = employees;
@@ -149,7 +138,7 @@ function executives(sessionid, realm) {
   // 再次从第6行开始填入表格
   var row = 6;
   for (var i = 1; i <= 5; i++) {
-    var position = "g" + i;
+    var position = i;
     var employees = gEmployees[position];
 
     if (employees) {
