@@ -36,7 +36,11 @@ const positionMap = {
   "2": "2",
   "3": "3",
   "4": "4",
-  "5": "5"
+  "5": "5",
+  "COO_Apprentice": "v",
+  "CFO_Apprentice": "x",
+  "CMO_Apprentice": "y",
+  "CTO_Apprentice": "z"
 };
 
 // 根据职位过滤员工信息并转换格式
@@ -100,6 +104,10 @@ function executives(sessionid, realm) {
   var cfo = getEmployeesByPosition(executives, "cfo");
   var cmo = getEmployeesByPosition(executives, "cmo");
   var cto = getEmployeesByPosition(executives, "cto");
+  var COO_Apprentice = getEmployeesByPosition(executives, "COO_Apprentice");
+  var CFO_Apprentice = getEmployeesByPosition(executives, "CFO_Apprentice"); 
+  var CMO_Apprentice = getEmployeesByPosition(executives, "CMO_Apprentice"); 
+  var CTO_Apprentice = getEmployeesByPosition(executives, "CTO_Apprentice"); 
 
   // 存储不同位置的员工信息
   var gEmployees = {};
@@ -108,6 +116,7 @@ function executives(sessionid, realm) {
   var profitSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(realm + "固定利润算成本");
   var speedSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(realm + "计算器（最大销售速度）");
   var optionSellPriceSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(realm + "自定义售价");
+
 
   // 获取当前表格并清空内容
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(realm + "高管");
@@ -122,6 +131,11 @@ function executives(sessionid, realm) {
   row = fillEmployeesToSheet(sheet, cfo, 3, 2);
   row = fillEmployeesToSheet(sheet, cmo, 4, 2);
   row = fillEmployeesToSheet(sheet, cto, 5, 2);
+  row = fillEmployeesToSheet(sheet, COO_Apprentice, 11, 2);
+  row = fillEmployeesToSheet(sheet, CFO_Apprentice, 12, 2);
+  row = fillEmployeesToSheet(sheet, CMO_Apprentice, 13, 2);
+  row = fillEmployeesToSheet(sheet, CTO_Apprentice, 14, 2);
+  
 
   // 填入其他位置的员工信息
   for (var i = 1; i <= 5; i++) {
@@ -179,8 +193,9 @@ function executives(sessionid, realm) {
   profitSheet.getRange(6, 4).setValue(formattedTime);
   speedSheet.getRange(6, 4).setValue(formattedTime);
   optionSellPriceSheet.getRange(6, 4).setValue(formattedTime);
+
   // 在高管表 A11 单元格设置格式化时间
-  sheet.getRange(11, 1).setValue(formattedTime);
+  sheet.getRange(15, 1).setValue(formattedTime);
 
 
 }
